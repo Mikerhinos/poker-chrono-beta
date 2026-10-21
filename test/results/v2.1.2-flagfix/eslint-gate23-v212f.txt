@@ -1,0 +1,9 @@
+# Porte 23 — ESLint flat config (v2.1.2-flagfix)
+# date: 2026-10-21 23:46:51    
+# eslint: v9.39.5
+# config: test/results/v2.1.2/eslint.concat.config.mjs (copié dans scratch, node_modules symlinké)
+# all.js = concat js/deck.js js/game.js js/i18n.js js/audio.js js/fx.js js/ui.js (ordre des <script> d'index.html), 68499 bytes
+# commande : node node_modules/eslint/bin/eslint.js --no-config-lookup --config eslint.concat.config.mjs all.js
+----- sortie -----
+(sortie vide = 0 erreur, ESLint ne sort rien quand tout est clean)
+RC_eslint: 0

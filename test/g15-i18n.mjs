@@ -74,7 +74,7 @@ const run = async () => {
   })()`);
   check('noms de mains traduits (9 mains + Incomplet, 5 langues)', handAudit.length === 0, JSON.stringify(handAudit));
 
-  // 4) Aucune chaîne FR (caractères accentués) sur la page EN, hors <select id="lang">
+  // 4) Aucune chaîne FR (caractères accentués) sur la page EN, hors le menu <div id="lang">
   const frLeak = await page(`(() => {
     const langSel = document.querySelector('#lang');
     const clone = document.body.cloneNode(true);
@@ -84,6 +84,62 @@ const run = async () => {
     return m ? m.length : 0;
   })()`);
   check('aucun caractère FR accentué sur la page EN (hors menu langue)', frLeak === 0, String(frLeak));
+  // 4bis) Menu de langue custom (v2.1.2 flagfix) : le <select> natif ne rend
+  // pas les drapeaux emoji dans sa popup sous Windows (Opera PC) — menu DOM
+  // ARIA custom. 10 checks ; retour EN avant la suite du test.
+  const menuState = await page(`(() => {
+    const btn = document.querySelector('#lang-btn');
+    const list = document.querySelector('#lang-list');
+    return {
+      hasSelect: !!document.querySelector('select#lang'),
+      hasBtn: !!btn,
+      hasList: !!list,
+      listHidden: list ? list.hidden : null,
+      expanded: btn ? btn.getAttribute('aria-expanded') : null,
+      options: [...document.querySelectorAll('#lang-list li[data-lang]')].map((o) => o.dataset.lang),
+      btnLabel: btn ? btn.textContent : ''
+    };
+  })()`);
+  check('menu langue : aucun select#lang (popup native remplacée)', menuState.hasSelect === false);
+  check('menu langue : bouton + liste présents, liste fermée au départ',
+    menuState.hasBtn && menuState.hasList && menuState.listHidden === true && menuState.expanded === 'false');
+  check('menu langue : 5 options data-lang (en,fr,es,it,de)',
+    JSON.stringify([...menuState.options].sort()) === JSON.stringify(['de', 'en', 'es', 'fr', 'it']),
+    JSON.stringify(menuState.options));
+  check('menu langue : étiquette bouton = langue courante (EN)', menuState.btnLabel.includes('English'));
+  await page(`document.querySelector('#lang-btn').click()`);
+  const opened = await page(`(() => ({
+    expanded: document.querySelector('#lang-btn').getAttribute('aria-expanded'),
+    hidden: document.querySelector('#lang-list').hidden
+  }))()`);
+  check('menu langue : clic bouton → ouverte (aria-expanded="true", hidden retiré)',
+    opened.expanded === 'true' && opened.hidden === false);
+  await page(`[...document.querySelectorAll('#lang-list li[data-lang]')]
+    .find((o) => o.dataset.lang === 'es').click()`);
+  const afterEs = await page(`(() => {
+    const btn = document.querySelector('#lang-btn');
+    return {
+      lang: window.G.I18N.getLang(),
+      htmlLang: document.documentElement.lang,
+      ls: localStorage.getItem('poker-chrono-lang'),
+      btnLabel: btn.textContent,
+      hidden: document.querySelector('#lang-list').hidden,
+      expanded: btn.getAttribute('aria-expanded')
+    };
+  })()`);
+  check('menu langue : clic option ES → getLang() = es', afterEs.lang === 'es');
+  check('menu langue : clic option ES → <html lang="es"> + localStorage es',
+    afterEs.htmlLang === 'es' && afterEs.ls === 'es');
+  check('menu langue : clic option ES → étiquette bouton « Español »',
+    afterEs.btnLabel.includes('Español'));
+  check('menu langue : clic option ES → liste fermée (hidden + aria-expanded="false")',
+    afterEs.hidden === true && afterEs.expanded === 'false');
+  await page(`[...document.querySelectorAll('#lang-list li[data-lang]')]
+    .find((o) => o.dataset.lang === 'en').click()`);
+  const backEn = await page(`({ lang: window.G.I18N.getLang(), ls: localStorage.getItem('poker-chrono-lang'), btnLabel: document.querySelector('#lang-btn').textContent })`);
+  check('menu langue : retour EN avant la suite du test',
+    backEn.lang === 'en' && backEn.ls === 'en' && backEn.btnLabel.includes('English'));
+
 
   // 5) Bascule FR : <html lang>, titre, statut, options difficulté, persistance
   await page(`window.G.I18N.setLang('fr')`);

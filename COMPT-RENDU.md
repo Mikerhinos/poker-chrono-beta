@@ -626,3 +626,55 @@ Logs intégraux : `test/results/v2.1.2-q/`.
 - **Installation scratch ESLint v2.1.2 introuvable** (nettoyage scratch) → réinstallation 86 packages (12 s), config copiée à côté de `node_modules` → résolution OK.
 - **Multiset de lignes old≠new** (non sémantique) : lignes vides, virgules de fin d'objet et objets single-line normalisés — documenté en §1, prouvé sans impact sémantique (multiset de micro-tokens invariant + bench byte-identique + 22 portes vertes).
 - **Rien d'autre d'omis** : toutes les portes re-run post-tri, logs dans `test/results/v2.1.2-q/`.
+
+---
+
+## PATCH v2.1.2 — menu de langue custom (flagfix « drapeaux ») — 2026-10-21
+
+**Contexte** : commit atomique `fix:` sur `main` (fils de `0e5f39a`, post-`8d8ec06`). Version inchangée (v2.1.2). Pas de push (NI4NI pousse après revue). Branche `v2.2` (`cb3077a`) non touchée. Aucune nouvelle dépendance runtime.
+
+**Cause racine** : le menu de langue était un `<select id="lang">` natif avec drapeaux en emoji (séquences Regional Indicator) dans chaque `<option>`. Sous Windows (Opera PC), la popup native du `<select>` ne rend pas ces emoji (sous Android : oui). La logique i18n (persistance `poker-chrono-lang`, `<html lang>` dynamique, 5 dictionnaires `js/i18n.js`) était saine — le bug était purement le rendu de la popup native.
+
+**Correction** (flagfix — 4 fichiers + test) :
+
+- `index.html` : `<select>` remplacé par un menu DOM custom — `<div id="lang" class="lang-menu">` (conserve `id="lang"` : le test g15 retire `#lang` du clone du check fuite FR), `<button id="lang-btn" type="button" aria-haspopup="listbox" aria-expanded="false">` + `<ul id="lang-list" class="lang-list" role="listbox" hidden>` avec 5 `<li role="option" data-lang="en|fr|es|it|de">` (🇬🇧 English, 🇫🇷 Français, 🇪🇸 Español, 🇮🇹 Italiano, 🇩🇪 Deutsch).
+- `js/ui.js` : binding `langSel` (listener `change` ~L417-425) remplacé par : clic bouton → toggle liste + `aria-expanded` (`stopPropagation`) ; clic `li[data-lang]` → `G.I18N.setLang(opt.dataset.lang)` + `renderAll()` + fermeture ; clic extérieur + Échap → fermeture ; étiquette du bouton synchronisée sur la langue courante. Persistance + `<html lang>` inchangés, toujours via `G.I18N`.
+- `css/base.css` : dropdown cohérent avec les contrôles existants (vars `--panel`/`--panel2`/`--line`/`--accent`), bouton dans le style `select, button`, liste `position:absolute` sous le bouton (z-index, ombre).
+- `test/g15-i18n.mjs` : +10 checks menu — pas de `select#lang` ; bouton + liste présents, liste fermée au départ ; 5 options `data-lang` ; étiquette bouton = langue courante ; clic bouton → ouverte (`aria-expanded=true`) ; clic option ES → `getLang()==='es'` + `<html lang="es">` + localStorage `es` + étiquette bouton ES + liste fermée ; retour EN avant la suite du test. **20 → 30 checks**.
+- Alternatives écartées : polyfill de la popup native (aucun levier sur le rendu du popup OS, non maintenable) ; images/`<canvas>` (lourdeur, perte d'accessibilité).
+
+### Réexécution complète (2026-10-21, machine contrainte : séquentiel, un Chrome à la fois)
+
+| Porte | Commande | Résultat |
+|---|---|---|
+| g1-scores | `node test/g1-scores.js` | **FAIL (RC=1) — anomalie préexistante** : 34 checks ok, crash sur le check verbatim croisé (`ENOENT C:\Users\Mikerhinos\poker-rush\index.html`) — état hérité de v2.1, non régressif |
+| g3-swap | `node test/g3-swap.js` | 24 OK, 0 FAIL (RC=0) |
+| g8-scan | `node test/g8-scan.mjs` | 24 OK, 0 FAIL (RC=0) — taille totale HTML+CSS+JS **146 742 octets** (fenêtre 100–200 Ko) |
+| g14-innertest | `node test/g14-innertest.mjs` | FAILURES: 0 (RC=0) |
+| go-logic | `node test/go-logic.mjs` | 18 ok, 0 fail (RC=0) |
+| max-board | `node test/max-board.mjs` | 7 OK, 0 FAIL (RC=0) |
+| w3c | `node test/w3c.mjs` | 3 ok, 0 fail (RC=0) |
+| g4-colors | `node test/run-headless.mjs g4-colors.mjs 9441` | 18 OK, 0 FAIL (RC=0) |
+| g5-rownames | `node test/run-headless.mjs g5-rownames.mjs 9442` | 4 OK, 0 FAIL (RC=0) |
+| g5-ui | `node test/run-headless.mjs g5-ui.mjs 9443` | 20 OK, 0 FAIL (RC=0) |
+| g6-audio | `node test/run-headless.mjs g6-audio.mjs 9444` | 16 OK, 0 FAIL (RC=0) |
+| g7-fx | `node test/run-headless.mjs g7-fx.mjs 9445` | 8 OK, 0 FAIL (RC=0) |
+| g9-boards | `node test/run-headless.mjs g9-boards.mjs 9446` | FAILURES: 0 (RC=0) |
+| g11-noscore | `node test/run-headless.mjs g11-noscore.mjs 9447` | FAILURES: 0 (RC=0) |
+| g12-seed | `node test/run-headless.mjs g12-seed.mjs 9448` | FAILURES: 0 (RC=0) |
+| g13-best | `node test/run-headless.mjs g13-best.mjs 9449` | FAILURES: 0 (RC=0) |
+| g15-i18n | `node test/run-headless.mjs g15-i18n.mjs 9450` | **30 ok, 0 fail** (RC=0) |
+| go-ui | `node test/run-headless.mjs go-ui.mjs 9451` | 11 ok, 0 fail (RC=0) |
+| go-ui-85 | `node test/run-headless.mjs go-ui-85.mjs 9452` | 6 ok, 0 fail (RC=0) |
+| g5-run (Chrome auto-spawn) | `node test/g5-run.mjs` | 20 OK, 0 FAIL (RC=0) |
+| bench 900 (launcher) | `node test/run-headless.mjs g2g4-headless.js 9460` | 900 parties, 0 erreur JS, PORTE PASSÉE (RC=0) |
+| ESLint porte 23 | concat `all.js` (68 499 octets, ordre des `<script>`) + flat config `test/results/v2.1.2/eslint.concat.config.mjs`, `eslint --no-config-lookup` (v9.39.5) | **0 erreur** (RC=0) |
+
+**Bench 900 (sha256 normalisé)** : run du 2026-10-21 sur l'arbre flagfix → normalisation (ligne `total : 900 parties…` retirée, `"wall"` → `"111.5"` quotes préservées, rejoint par `\n` + `\n` final, SHA-256 UTF-8) → `312841cd81911460d998d4b4d6a026cfab11b4c7efca4559a8443bc828bc357a` — **identique à l'archivé v2.1.2** (`test/results/v2.1.2/bench900-normalized.sha256`).
+
+**Preuves** : `test/results/v2.1.2-flagfix/` — `suite-run-v212f.txt` (log intégral), `eslint-gate23-v212f.txt` (porte 23), `bench900-run-v212f.txt` (sortie brute), `bench900-normalized.sha256` (preuve d'identité).
+
+**Anomalies** :
+1. `g1-scores` : `C:\Users\Mikerhinos\poker-rush\index.html` absent de la machine (préexistant, cf. §2 de ce compte-rendu — la porte g1 officielle est remplacée par `g1-adhoc.mjs` 41/41 en v2.1.2).
+2. `stdin` non-TTY de la session bash : tout appel `node` exige `< /dev/null` (contournement documenté dans ANCRE-PARTS.md) ; 1er appel node d'un batch parfois refusé → réessai immédiat.
+3. Drift de hashs préexistant : `8d8ec06` (topo-tri `js/*.js`) avait modifié 5 fichiers `js/*.js` sans mettre à jour `MANIFESTE.md` ni `sha256-final-v212.txt` — recalculé par re-lecture dans ce commit.

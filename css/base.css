@@ -101,3 +101,36 @@
   #p2p-status { min-width:170px; font-size:.85rem; color:var(--muted); }
 
   
+  /* v2.1.2 flagfix : menu de langue custom (drapeaux) — le <select> natif ne
+     rend pas les drapeaux emoji dans sa popup sous Windows (Opera PC).
+     Le bouton hérite du style 'select, button' ; la liste retombe dessous. */
+  .lang-menu {
+    position: relative;
+    display: inline-flex;
+  }
+  .lang-list {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 30;
+    margin: 0;
+    padding: 4px 0;
+    list-style: none;
+    background: var(--panel2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    min-width: 100%;
+  }
+  .lang-list li {
+    padding: 7px 14px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .lang-list li:hover {
+    background: var(--panel);
+    color: var(--accent);
+  }
+

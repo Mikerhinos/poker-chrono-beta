@@ -1,6 +1,6 @@
-# MANIFESTE — Poker Chrono v2.1.2 (état final, 2026-10-20)
+# MANIFESTE — Poker Chrono v2.1.2 (état final, 2026-10-21, flagfix menu de langue)
 
-**État** : HEAD `98aa7f3` (commit B — re-execution intégrale 22 portes + w3c + ESLint #23), tree clean. Stack de 6 commits v2.1.2 sur la base `1c65214` (v2.1.1 phase D) : `7059b88` (pulse-glow) → `3595642` (Finish!) → `1514dcb` (Pointer Events) → `455a4e6` (musique OFF) → `351c159` (fix `bd1`) → `98aa7f3` (preuves).
+**État** : commit `fix:` flagfix menu de langue (fils de `0e5f39a`, post-`8d8ec06`), tree clean hors untracked hors périmètre, version 2.1.2 inchangée. Stack de 6 commits v2.1.2 sur la base `1c65214` (v2.1.1 phase D) : `7059b88` (pulse-glow) → `3595642` (Finish!) → `1514dcb` (Pointer Events) → `455a4e6` (musique OFF) → `351c159` (fix `bd1`) → `98aa7f3` (preuves).
 
 **Périmètre** : les **48 entrées** ci-dessous = périmètre du manifeste v2.1 (`sha256-final-v21.txt`), inchangé : livrables site (12), tests CDP/logiques (24 scripts), preuves de runs (8), docs et squelettes (4). Hashs **recalculés par re-lecture** de chaque fichier à l'état final — aucun hash repris d'un artefact antérieur.
 
@@ -10,7 +10,7 @@
 
 | Invariant | Valeur |
 |---|---|
-| Taille totale HTML+CSS+JS | **144 348 octets** (100–200 Ko, porte 8) |
+| Taille totale HTML+CSS+JS | **146 742 octets** (100–200 Ko, porte 8) |
 | Bench 900 (sortie normalisée) | `312841cd81911460d998d4b4d6a026cfab11b4c7efca4559a8443bc828bc357a` (identique v2.1.1) |
 | Portes | **22/22 vertes** + w3c 3/3 (voir COMPT-RENDU v2.1.2) |
 | ESLint porte 23 | exit 0, 0 erreur (concaténation `all.js`, config `test/results/v2.1.2/eslint.concat.config.mjs`) |
@@ -22,18 +22,18 @@
 | n | chemin | sha256 |
 |---|---|---|
 | 1 | `./ANCRE-PARTS.md` | `ba9e1555316b0e88b97df62c844ecb35d3aa6ee7fc9a3ce666fffe097eb21a2c` |
-| 2 | `./COMPT-RENDU.md` | `fb3efb6d82dbfc2a5f4ad2819dc438a49de5d8624b34033327c7746fe5fb6e5d` |
+| 2 | `./COMPT-RENDU.md` | `363eb57f4770ea237624b1524ac453f447d273dc4ab6af72a410e4affbb7df1e` |
 | 3 | `./css/anim.css` | `f8beff71bf0e2936f2f87f34444ee481b9d4f0f19a79bfe576f157e2f50d569a` |
-| 4 | `./css/base.css` | `a8bab1e7bafc84d76ff8cd3548d17795305ca0d21d476990ce0ae94e0204d9b3` |
+| 4 | `./css/base.css` | `f2163465313cb2c81996672d3b95a7d0cb9812ce99d8ff052d39b250897f292f` |
 | 5 | `./css/fonts.css` | `0f697d3146f6c7e4a818ea7f25458ab62a60713543049b3c6aa754659709f68a` |
 | 6 | `./css/theme.css` | `bda14af5e8afe1efb09fab88490bea039e281b235654469c099856fa37d2da89` |
-| 7 | `./index.html` | `b86304fc8a125b4cfdb88f752f2159e157a96358e7c467bd5f34c259f88ab399` |
-| 8 | `./js/audio.js` | `f72fba8752200a8bdf5604bbb1627422fbc5c319f5024559d7e8c2f5af3d1061` |
-| 9 | `./js/deck.js` | `12d306b5015e76bb88cd8f6006448e7090c63c463e6f0268a64291d875f0a66e` |
-| 10 | `./js/fx.js` | `5e6179b28e6c3dbf3b482438e3e6bede5287dcf49d15902cb7242264c7cc1d75` |
-| 11 | `./js/i18n.js` | `aaf094d7d5bce100199e23fc38fa3f89debb85e0073cc41fefac15efdf0637ea` |
-| 12 | `./js/game.js` | `621aac59dddcc9d6987804adf0f4a49b48c522b6c705805959e0c2f9ce81c7de` |
-| 13 | `./js/ui.js` | `6df9c9f3b966a1445fb47d3663b1e8b8c4637e1f3dd67bf8f7b4dd8164a1982e` |
+| 7 | `./index.html` | `4768dbfaaac2edc44188d304165a459c76f20a47f523a9908173674303fe2751` |
+| 8 | `./js/audio.js` | `e2d144421e0bc1454eb328b50c9eace97f73e7b3d9a21fec1bffafecc5252759` |
+| 9 | `./js/deck.js` | `f7f02ef31fb56880e2a7caf2c10302bfa24d34c2bfca9b602cad324c1f50df73` |
+| 10 | `./js/fx.js` | `e388cdcd4a30fd7b6df8bd81fd4333a7bbf2a6621ea5c5ce11c732e5e92fe374` |
+| 11 | `./js/i18n.js` | `c60ba2cdf6057071086e7ed369e85c0cbc378d1fd4d925d530c020b3bfd9538a` |
+| 12 | `./js/game.js` | `70636d20927800ce6f74b7360bbdebed708936bd0d3cd8577c83916993fa5a1e` |
+| 13 | `./js/ui.js` | `0ef9418ac24706a3b1740bfe1baccb2088a6faacd2a1e0a417798b6893493a15` |
 | 14 | `./README.md` | `bec68f65b72959c1958d0243c1cbf652118e6fc4debde26be56c743732b96476` |
 | 15 | `./test/cdp.mjs` | `986dea6adb306bb3b2b63d87059f3df6c5148630a02502af743e2f1453c5b554` |
 | 16 | `./test/diag-p4.mjs` | `be4efbe80888e11f1544486ce1515877cd05e2fac723135c3e6cd6c650080485` |
@@ -41,7 +41,7 @@
 | 18 | `./test/g12-seed.mjs` | `7ffa802aff67dcb3b8514ca86c68dafec98b113fd18ce3d953376323de4089cd` |
 | 19 | `./test/g13-best.mjs` | `4f52b1613d7c517a5970e618ab31ccf59d37b78dd5cf1729d18867b03d318b4a` |
 | 20 | `./test/g14-innertest.mjs` | `f55502999a269c77fcea99b5b9e41efe03ef9ab930b51fd86953db95b39df5ac` |
-| 21 | `./test/g15-i18n.mjs` | `d65200d718d8a8ea9683dc78328413e800669f53415e8fd9cc777b92817c26ec` |
+| 21 | `./test/g15-i18n.mjs` | `646c96bb00286c9adb7363f6b554b850e08026471c293edd336a015023899a5d` |
 | 22 | `./test/g1-result.txt` | `b48db4e2b37ee9ea23654684ea5d51689ef2a5569c6f45eba5042b29f428c323` |
 | 23 | `./test/g1-scores.js` | `d1c06237b5c6e08b1de7b3c59725add5888a90ca374137d670e01610c28c39ac` |
 | 24 | `./test/g2g4-headless.js` | `1f63e9041a75fcda647823fa9628fddfdcb73b06149b111d2652640df8aeab08` |
@@ -91,9 +91,45 @@
 
 Les 36 autres entrées sont inchangées, dont `./test/g2g4-result.txt` (`33e6d93f…`, ancre bench 900) et `./js/deck.js` (verbatim baseline v2.0.0).
 
+## PATCH v2.1.2 — flagfix menu de langue (2026-10-21)
+
+**Cause racine** : `<select id="lang">` natif — la popup native ne rend pas les drapeaux emoji (Regional Indicator) sous Windows/Opera PC (Android : oui). Logique i18n saine (persistance `poker-chrono-lang`, `<html lang>` dynamique, 5 dictionnaires). Correction : menu DOM custom ARIA (bouton + `ul[role=listbox]`, 5 options `data-lang`), sans dépendance.
+
+**Fichiers modifiés par le flagfix** (hashs recalc par re-lecture) :
+
+| # | chemin | sha256 (nouveau) |
+|---|---|---|
+| 4 | `./css/base.css` | `f2163465313cb2c81996672d3b95a7d0cb9812ce99d8ff052d39b250897f292f` |
+| 7 | `./index.html` | `4768dbfaaac2edc44188d304165a459c76f20a47f523a9908173674303fe2751` |
+| 13 | `./js/ui.js` | `0ef9418ac24706a3b1740bfe1baccb2088a6faacd2a1e0a417798b6893493a15` |
+| 21 | `./test/g15-i18n.mjs` | `646c96bb00286c9adb7363f6b554b850e08026471c293edd336a015023899a5d` |
+| 2 | `./COMPT-RENDU.md` | `363eb57f4770ea237624b1524ac453f447d273dc4ab6af72a410e4affbb7df1e` (section flagfix ajoutée) |
+
+**Drift préexistant réparé dans ce commit** : `8d8ec06` (topo-tri) avait modifié 5 `js/*.js` sans mettre à jour la table — recalculés ci-dessus :
+
+| # | chemin | sha256 (nouveau) |
+|---|---|---|
+| 8 | `./js/audio.js` | `e2d144421e0bc1454eb328b50c9eace97f73e7b3d9a21fec1bffafecc5252759` |
+| 9 | `./js/deck.js` | `f7f02ef31fb56880e2a7caf2c10302bfa24d34c2bfca9b602cad324c1f50df73` |
+| 10 | `./js/fx.js` | `e388cdcd4a30fd7b6df8bd81fd4333a7bbf2a6621ea5c5ce11c732e5e92fe374` |
+| 11 | `./js/i18n.js` | `c60ba2cdf6057071086e7ed369e85c0cbc378d1fd4d925d530c020b3bfd9538a` |
+| 12 | `./js/game.js` | `70636d20927800ce6f74b7360bbdebed708936bd0d3cd8577c83916993fa5a1e` |
+
+**Preuves nouvelles (périmètre élargi 49–52, hors `sha256-final-v212.txt` qui reste sur le périmètre 48)** :
+
+| n | chemin | sha256 |
+|---|---|---|
+| 49 | `./test/results/v2.1.2-flagfix/suite-run-v212f.txt` | `b4a63e6bbb35a1c21589754ccaa60f86754e820483ff0a75650347d1f871d962` |
+| 50 | `./test/results/v2.1.2-flagfix/eslint-gate23-v212f.txt` | `e610b96e89cce7205e9438eb95a4d43e026a901d0803bea47aa9eac47e7f2cbb` |
+| 51 | `./test/results/v2.1.2-flagfix/bench900-run-v212f.txt` | `408864155f17bf69b256274902a39246c7ea622e3d7376121aa56beb5b44edee` |
+| 52 | `./test/results/v2.1.2-flagfix/bench900-normalized.sha256` | `cc099f1253a0f162d259ad2fdf44e9d1517ab2ea377eb369d84c77e988b38ffd` |
+
+**Réexécution complète du 2026-10-21** : 22 portes + w3c + ESLint 23 — **FAILURES 0** sur toutes les portes exécutables, sauf `g1-scores` (anomalie préexistante : `poker-rush` absent de la machine, non régressif ; la porte officielle g1 était déjà remplacée par `g1-adhoc.mjs` 41/41 en v2.1.2). `g15-i18n` : 20 → **30 checks** verts. Bench 900 : sha256 normalisé `312841cd…` **identique à l'archivé v2.1.2**. Détails : COMPT-RENDU « PATCH v2.1.2 — menu de langue custom » et `test/results/v2.1.2-flagfix/`.
+
 ## Procédure
 
 1. `git status --porcelain` → tree clean à `98aa7f3`.
 2. Re-lecture binaire de chacun des 48 chemins du périmètre, SHA-256 UTF-8.
 3. Format machine `sha256-final-v212.txt` (une ligne par entrée : `<n>|<sha256> *<path>`).
 4. Diff vs `sha256-final-v21.txt` : 12 changés / 36 inchangés (table ci-dessus).
+5. Flagfix 2026-10-21 : re-lecture binaire des 48 entrées + 4 preuves (`test/results/v2.1.2-flagfix/`), réexécution intégrale, table + section flagfix ci-dessus.

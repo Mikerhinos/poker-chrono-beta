@@ -1,0 +1,5 @@
+Bench 900 — Poker-Chrono v2.1.2 (flagfix)
+Procédure : stdout brut, ligne « total : 900 parties en X s » retirée, champ JSON « wall » → 111.5, rejoint par \n + \n final, SHA-256 UTF-8.
+hash v2.1.2-flagfix : 312841cd81911460d998d4b4d6a026cfab11b4c7efca4559a8443bc828bc357a
+référence v2.1.2 archivée : 312841cd81911460d998d4b4d6a026cfab11b4c7efca4559a8443bc828bc357a
+identité : OUI

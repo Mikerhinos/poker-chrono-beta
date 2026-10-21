@@ -28,13 +28,18 @@
       <option value="90">90 s</option>
     </select>
 
-  <select id="lang" title="Language">
-    <option value="en">🇬🇧 English</option>
-    <option value="fr">🇫🇷 Français</option>
-    <option value="es">🇪🇸 Español</option>
-    <option value="it">🇮🇹 Italiano</option>
-    <option value="de">🇩🇪 Deutsch</option>
-  </select>
+  <!-- v2.1.2 flagfix : menu de langue custom — le <select> natif ne rend pas
+       les drapeaux (emoji Regional Indicator) dans sa popup sous Windows (Opera PC). -->
+  <div id="lang" class="lang-menu">
+    <button id="lang-btn" type="button" aria-haspopup="listbox" aria-expanded="false">🇬🇧 English</button>
+    <ul id="lang-list" class="lang-list" role="listbox" hidden>
+      <li role="option" data-lang="en">🇬🇧 English</li>
+      <li role="option" data-lang="fr">🇫🇷 Français</li>
+      <li role="option" data-lang="es">🇪🇸 Español</li>
+      <li role="option" data-lang="it">🇮🇹 Italiano</li>
+      <li role="option" data-lang="de">🇩🇪 Deutsch</li>
+    </ul>
+  </div>
 
     <select id="colors" title="Card color mode" data-i18n-title="colors_label">
       <option value="2" selected data-i18n="colors_2">2 colors</option>
