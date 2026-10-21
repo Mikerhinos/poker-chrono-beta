@@ -47,6 +47,13 @@
       <label class="vol"><span data-i18n="vol_sfx">SFX vol.</span><input type="range" id="sfx-vol" min="0" max="100" value="80"></label>
     </div>
     <button id="start" class="pulse-glow" type="button" data-i18n="play">Play</button>
+    <button id="p2p-open" type="button" data-i18n="p2p_title">Two-player</button>
+    <div id="p2p-panel" hidden>
+      <button id="p2p-host" type="button" data-i18n="p2p_host_btn">Host a game</button>
+      <button id="p2p-join" type="button" data-i18n="p2p_join_btn">Join with a code</button>
+      <input id="p2p-code" type="text" maxlength="8" autocomplete="off" placeholder="Room code">
+      <div id="p2p-status"></div>
+    </div>
     <div id="timer">--</div>
     <div id="status" data-i18n="idle">Ready - choose difficulty and time.</div>
   </div>
@@ -85,5 +92,7 @@
 <script id="audio" src="js/audio.js"></script>
 <script src="js/fx.js"></script>
 <script id="ui" src="js/ui.js"></script>
+<script src="js/peerjs.min.js"></script>
+<script src="js/net.js"></script>
 </body>
 </html>

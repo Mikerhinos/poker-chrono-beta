@@ -76,4 +76,28 @@
   #replay { margin-top:12px; font-size:1rem; padding:9px 18px; }
   #msg { color:var(--warn); font-size:.9rem; min-height:1.3em; text-align:center; padding-top:10px; }
 
+  /* --- 2P : panneau WebRTC P2P (milestone V2.2-A) --- */
+  #p2p-open {
+    background:transparent; border:1px solid var(--line); border-radius:8px;
+    color:var(--text); cursor:pointer; padding:6px 12px;
+  }
+  #p2p-open:hover { border-color:var(--accent); }
+  #p2p-panel {
+    display:flex; flex-wrap:wrap; align-items:center; gap:6px;
+    margin:10px 0 4px; padding:8px 10px;
+    background:var(--panel); border:1px solid var(--line); border-radius:10px;
+  }
+  #p2p-panel[hidden] { display:none; }
+  #p2p-host, #p2p-join {
+    background:transparent; border:1px solid var(--line); border-radius:8px;
+    color:var(--text); cursor:pointer; padding:6px 10px;
+  }
+  #p2p-host:hover, #p2p-join:hover { border-color:var(--accent); }
+  #p2p-code {
+    width:96px; border:1px solid var(--line); border-radius:8px;
+    background:var(--bg); color:var(--text); padding:6px 8px;
+    font-family:ui-monospace,monospace; letter-spacing:2px; text-transform:uppercase;
+  }
+  #p2p-status { min-width:170px; font-size:.85rem; color:var(--muted); }
+
   

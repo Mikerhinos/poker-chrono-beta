@@ -1,0 +1,22 @@
+Chrome CDP prêt sur 127.0.0.1:9347 pour g15-i18n.mjs
+  ok  langue par défaut = en (getLang)
+  ok  <html lang="en" par défaut
+  ok  titre EN appliqué
+  ok  meta description EN appliquée
+  ok  5 langues (en, fr, es, it, de)
+  ok  5 dictionnaires : même jeu de clés
+  ok  0 clé vide sur les 5 dictionnaires
+  ok  nombre de clés rapporté
+  ok  noms de mains traduits (9 mains + Incomplet, 5 langues)
+  ok  aucun caractère FR accentué sur la page EN (hors menu langue)
+  ok  FR : <html lang="fr">
+  ok  FR : titre traduit
+  ok  FR : localStorage persisté
+  ok  FR : difficultés Facile/Normal/Difficile
+  ok  FR : statut idle traduit
+  ok  DE : <html lang="de">
+  ok  DE : localStorage
+  ok  EN restauré : <html lang="en">
+  ok  EN restauré : localStorage
+  ok  persistance au rechargement (it)
+g15-i18n : 20 ok, 0 fail

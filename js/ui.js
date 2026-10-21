@@ -52,6 +52,7 @@
   let sirenPlayed = false;
 
   let state = null;
+  let twoPlayer = false; // v2.2 P2P : mode 2 joueurs actif
 
   let uiTimer = null;
 
@@ -221,6 +222,7 @@
       G.FX.cellBurst('#board-human .cell[data-idx="' + from + '"]');
       G.FX.cellBurst('#board-human .cell[data-idx="' + to + '"]');
     }
+    if (twoPlayer && G.P2P) G.P2P.onLocalHumanMove(from, to);
   }
 
   function readLS(key, dflt) {
@@ -298,20 +300,17 @@
   }
 
   /* ---------- cycle de vie ---------- */
-  function startGame() {
-    const difficulty = $('#diff').value;
-    const time = parseInt($('#time').value, 10);
-    // Fix H1/H2 : seed 128 bits CSPRNG interne (aucun handle public de seed),
-    // état vivant dans la closure (aucun handle d'état public mutable).
-    state = G.createGame({ difficulty, time });
+  function beginGame(difficulty, time, seed, frozen) {
+    const opts = { difficulty, time };
+    if (seed) opts.seed = seed;
+    state = G.createGame(opts);
+    if (frozen) state.aiFrozen = true; // v2.2 P2P : gel de l'IA locale
     G.start(state);
     lastUiMs = performance.now();
     lastAiMoveSeen = -1;
     lastWholeSec = Math.ceil(state.timeLeft / 1000);
     sirenPlayed = false;
     $('#final').hidden = true;
-    /* v2.1.2 : la pulsation du bouton de départ s'arrête au démarrage (classe
-     * retirée — aucun changement de logique de jeu). */
     $('#start').classList.remove('pulse-glow');
     msg('');
     status(G.I18N.t('running', { time, diff: G.I18N.diffLabel(difficulty) }));
@@ -321,6 +320,36 @@
     updateGoButton();
     if (uiTimer) clearInterval(uiTimer);
     uiTimer = setInterval(uiTick, 100);
+  }
+
+  function startGame() {
+    twoPlayer = false;
+    beginGame($('#diff').value, parseInt($('#time').value, 10), null, false);
+  }
+
+  /* v2.2 P2P : demarrage a partir du seed 128 bits partags (4xuint32).
+   * L'IA locale est gelée ; les coups du distant arrivent via applyRemoteMove. */
+  function start2PGame(seed) {
+    twoPlayer = true;
+    beginGame('normal', 30, seed, true);
+    status(G.I18N.t('status_connected'));
+  }
+
+  /* v2.2 P2P : un swap du distant s'applique sur NOTRE plateau "ai" (le sien). */
+  function applyRemoteMove(from, to) {
+    if (!twoPlayer || !state) return;
+    if (state.over || !state.running) return;
+    const prevScores = [
+      G.rowScore(state.boards.ai[0]), G.rowScore(state.boards.ai[1]), G.rowScore(state.boards.ai[2])
+    ];
+    const res = G.remoteSwap(state, from, to);
+    if (!res.ok) { msg(G.I18N.t(REASONS[res.reason] || REASONS.invalid)); return; }
+    renderBoard('ai', { prevScores, flipIdx: [from, to] });
+    updateScores();
+    if (G.FX) {
+      G.FX.cellBurst('#board-ai .cell[data-idx="' + from + '"]');
+      G.FX.cellBurst('#board-ai .cell[data-idx="' + to + '"]');
+    }
   }
 
   function status(text) { $('#status').textContent = text; }
@@ -449,7 +478,7 @@
    * (n'affecte ni la logique ni le barème). */
   G.UI = {
     renderBoard, renderAll, updateScores, updateTimer,
-    startGame, endGame, rowLabel,
+    startGame, endGame, rowLabel, start2PGame, applyRemoteMove,
     colorMode: () => colorMode,
     setColors: (m) => {
       colorMode = m === '4' ? '4' : '2';

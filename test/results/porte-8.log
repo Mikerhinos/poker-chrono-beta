@@ -1,3 +1,4 @@
+  ok   vendeur (peerjs.min.js) exclu du scan URL, compté dans la taille
   ok   zéro occurrence : URL http(s)://
   ok   zéro occurrence : protocole // (protocol-relative)
   ok   zéro occurrence : <img
@@ -8,19 +9,22 @@
   ok   zéro occurrence : import/export externe (module URL)
   ok   <script src="js/deck.js" référence locale — js/deck.js
   ok   <script src="js/game.js" référence locale — js/game.js
+  ok   <script src="js/i18n.js" référence locale — js/i18n.js
   ok   <script src="js/audio.js" référence locale — js/audio.js
   ok   <script src="js/fx.js" référence locale — js/fx.js
   ok   <script src="js/ui.js" référence locale — js/ui.js
+  ok   <script src="js/peerjs.min.js" référence locale — js/peerjs.min.js
+  ok   <script src="js/net.js" référence locale — js/net.js
   ok   <link href="css/base.css" référence locale — css/base.css
   ok   <link href="css/fonts.css" référence locale — css/fonts.css
   ok   <link href="css/theme.css" référence locale — css/theme.css
   ok   <link href="css/anim.css" référence locale — css/anim.css
-  ok   5 modules js/ référencés (deck, fx, game, ui, audio) — js/deck.js, js/game.js, js/audio.js, js/fx.js, js/ui.js
+  ok   8 modules js/ référencés (deck, game, i18n, audio, fx, ui, net, peerjs) — js/deck.js, js/game.js, js/i18n.js, js/audio.js, js/fx.js, js/ui.js, js/peerjs.min.js, js/net.js
   ok   4 feuilles css/ référencées (base, fonts, theme, anim) — css/base.css, css/fonts.css, css/theme.css, css/anim.css
   ok   aucun autre attribut src= (non data:/blob:/about:/js/)
   ok   2 polices embarquées en data:font/woff2;base64 — trouvées : 2
   ok   aucun chargement de police externe (@font-face + src local) — @font-face : 2
-  ok   taille totale (index.html + css/ + js/) entre 100 et 200 Ko — 119918 octets
+  ok   taille totale (index.html + css/ + js/) entre 100 et 256 Ko — 252720 octets
 
-[PORTE 8] 23 OK, 0 FAIL
+[PORTE 8] 27 OK, 0 FAIL
 [PORTE 8] PORTE PASSÉE

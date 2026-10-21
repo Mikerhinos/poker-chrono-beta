@@ -1,0 +1,12 @@
+{
+  "name": "poker-chrono",
+  "version": "2.2.0",
+  "private": true,
+  "description": "Poker Chrono — v2.2 P2P. Dépendances DEV uniquement (serveur de test PeerJS local, ESLint porte 23). Zéro dépendance runtime : PeerJS est vendorisé dans js/peerjs.min.js.",
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "eslint": "^9.39.2",
+    "peerjs": "^1.5.5",
+    "peerjs-server": "^0.2.9"
+  }
+}

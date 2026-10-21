@@ -67,6 +67,18 @@
       rngShuffle = mulberry32(seed ^ 0x9e3779b9);
       rngHuman = mulberry32(seed ^ 0x85ebca6b);
       rngAI = mulberry32(seed ^ 0xc2b2ae35);
+    } else if (Array.isArray(opts.seed) && opts.seed.length === 4) {
+      // v2.2 P2P : master 128 bits PARTAGE (4xuint32) partage - derivation deterministe
+      // identique des deux cotes (xoshiro128ss sur streams derives). Coeur de
+      // l'anti-triche : meme graine -> meme plateau, recalcule localement par
+      // chaque joueur (js/net.js). La graine est echangee, jamais l'etat.
+      const master = Uint32Array.from(opts.seed.map((w) => (w >>> 0) & 0xFFFFFFFF));
+      if (master[0] === 0 && master[1] === 0 && master[2] === 0 && master[3] === 0) {
+        master[0] = 0x9E3779B9; // etat nul interdit (coherent xoshiro128ss)
+      }
+      rngShuffle = xoshiro128ss(deriveStream(master, 0x9E3779B9));
+      rngHuman = xoshiro128ss(deriveStream(master, 0x85EBCA6B));
+      rngAI = xoshiro128ss(deriveStream(master, 0xC2B2AE35));
     } else {
       // Partie réelle (fix H1) : seed CSPRNG 128 bits (4×uint32) interne,
       // streams shuffle/human/AI dérivés (xoshiro128**) — aucune valeur 32
@@ -255,6 +267,25 @@
     return { ok: true };
   }
 
+  // v2.2 P2P : swap sur le plateau DISTANT (le plateau "ai" vu de notre cote).
+  // Meme validation que humanSwap ; met a jour aiMoves + lastAiMove (flash UI).
+  function remoteSwap(state, from, to) {
+    if (!state) return { ok: false, reason: 'invalid' };
+    if (state.over) return { ok: false, reason: 'over' };
+    if (!state.running) return { ok: false, reason: 'not_running' };
+    if (to === null || to === undefined) return { ok: false, reason: 'out' };
+    if (typeof from !== 'number' || typeof to !== 'number' ||
+        !Number.isInteger(from) || !Number.isInteger(to) ||
+        from < 0 || from > 14 || to < 0 || to > 14) {
+      return { ok: false, reason: 'invalid' };
+    }
+    if (from === to) return { ok: false, reason: 'self' };
+    swapCells(state.boards.ai, from, to);
+    state.aiMoves++;
+    state.lastAiMove = { i: from, j: to };
+    return { ok: true };
+  }
+
   function neutralMove(board) {
     const rs = rowScoresOf(board);
     for (const [i, j] of PAIRS) {
@@ -325,6 +356,6 @@ function swapCells(board, i, j) {
     // poker chrono
     DIFFICULTIES, TIME_OPTIONS, AI_INTERVAL, PAIRS,
     GO_MIN_MS, GO_BONUS_CAP,
-    createGame, start, tick, humanSwap, goNow, aiStep, humanRandomSwap,
+    createGame, start, tick, humanSwap, remoteSwap, goNow, aiStep, humanRandomSwap,
     simulateGame, cardText
   };
