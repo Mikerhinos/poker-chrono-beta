@@ -1,0 +1,12 @@
+Chrome CDP prêt sur 127.0.0.1:9445 pour g7-fx.mjs
+  ok   G.FX défini (canvas présent)
+  ok   canvas plein écran (largeur/hauteur > 0) — {"w":758,"h":482,"dpr":1,"clamp":true}
+  ok   devicePixelRatio borné ≤ 2 — dpr=1
+  ok   particules actives après le deal — actives=52
+  ok   bursts ajoutent des particules — avant=52 après=108
+  ok   60 fps ciblés (mesure headless ≥ 45 fps) — fps mesuré = 60
+  ok   secousse d’écran déclenchée au final
+  ok   0 erreur JS avec FX activés — 0 erreur(s)
+
+[PORTE 7] 8 OK, 0 FAIL
+[PORTE 7] PORTE PASSÉE

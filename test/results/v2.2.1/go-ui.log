@@ -1,0 +1,13 @@
+Chrome CDP prêt sur 127.0.0.1:9451 pour go-ui.mjs
+  ok  partie lancée (90 s)
+  ok  GO désactivé à t<5 s
+  ok  GO activé à t≈5 s (5000–5500 ms)
+  ok  clic GO effectué
+  ok  fin affichée après GO (plateaux décomposés)
+  ok  bonus = 16 pts (cap v2.1)
+  ok  total = plateau + 16
+  ok  détail en fin : bonus affiché avec les plateaux
+  ok  titre de fin non vide (W3C)
+  ok  double-clic : 1 seul bonus (idempotent)
+  ok  fin normale : bonus 0
+go-ui : 11 ok, 0 fail

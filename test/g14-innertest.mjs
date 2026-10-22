@@ -1,5 +1,5 @@
 // G14 — Scan statique : zéro innerHTML sur données dynamiques (fix L1).
-// Post-split v2.1.1 : le scan porte sur index.html + css/ + js/ (mêmes critères).
+// Post-split v2.2.1 : le scan porte sur index.html + css/ + js/ (mêmes critères).
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -24,7 +24,7 @@ lines.push('== G14 — Scan statique du rendu dynamique ==');
 check('aucune occurrence innerHTML dans le fichier', src.includes('innerHTML') === false, 'count=' + src.split('innerHTML').length);
 check('rendu des lignes via createElement', src.includes('createElement') === true);
 check('labels via textContent', src.includes('div.textContent') === true);
-check('version 2.1.1', /version: '2\.1\.1'/.test(src));
+check('version 2.2.1', /version: '2\.2\.1'/.test(src));
 check('xoshiro128ss présent (fix H1)', src.includes('function xoshiro128ss') === true);
 check('seed CSPRNG présent (fix H1)', src.includes('getRandomValues') === true);
 check('pas de handle d’état public (fix H2)', /G\.state\s*=|G\.lastSeed\s*=/.test(src) === false);

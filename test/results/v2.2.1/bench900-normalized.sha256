@@ -1,0 +1,5 @@
+bench900-run-v221.txt — normalisation : stdout+stderr, retrait de la ligne « total : 900 parties en X s »
+et des warnings Node MODULE_TYPELESS_PACKAGE_JSON (artifact runtime non déterministe), champ JSON « wall » → « 111.5 » (valeur de référence v2.1.2),
+rejoint par \n + \n final, SHA-256 UTF-8.
+312841cd81911460d998d4b4d6a026cfab11b4c7efca4559a8443bc828bc357a  bench900-normalized (v2.2.1, référence 312841cd8191…)
+identique à la référence v2.1.2/v2.2 : OUI

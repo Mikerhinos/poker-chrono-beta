@@ -1,4 +1,4 @@
-// PORTE 8 — Zéro dépendance externe : scan statique de index.html + css/ + js/ (post-split v2.1.1).
+// PORTE 8 — Zéro dépendance externe : scan statique de index.html + css/ + js/ (post-split v2.2.1).
 // Critères : aucune URL http(s)://, aucune référence externe ; les références relatives locales
 // (css/…, js/…) sont la structure du split et sont autorisées.
 // v2.2-a (recalibration, voir test/results/v2.2-a/g8-recalibration.md) : le vendeur PeerJS

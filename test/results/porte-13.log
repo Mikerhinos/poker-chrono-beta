@@ -1,8 +1,8 @@
-[ OK ] partie 1 : final atteint, score humain défini — {"best":"New best score: 22 pts","stored":"22","human":22}
-[ OK ] best « abc » ne bloque pas : record écrit — stored=22 human=22
-[ OK ] affichage « Nouveau meilleur score » — New best score: 22 pts
+[ OK ] partie 1 : final atteint, score humain défini — {"best":"New best score: 37 pts","stored":"37","human":37}
+[ OK ] best « abc » ne bloque pas : record écrit — stored=37 human=37
+[ OK ] affichage « Nouveau meilleur score » — New best score: 37 pts
 [ OK ] best « 999999 » conservé (pas de faux record) — stored=999999 human=22
 [ OK ] affichage du meilleur existant (pas « nouveau ») — Best score: 999999 pts
-[ OK ] best « -5 » → 0 : record écrit — stored=45 human=45
+[ OK ] best « -5 » → 0 : record écrit — stored=44 human=44
 FAILURES: 0
 RESULT: OK

@@ -54,28 +54,45 @@ async function main() {
   let cdp = null;
   try {
     cdp = await connect(process.argv[2] || '127.0.0.1:9347');
-    const nav = await cdp.send('Page.navigate', { url: 'file:///' + INDEX_HTML.replace(/\\/g, '/') });
+    // (a0) Broker par défaut (page sans query string) : cloud 0.peerjs.com:443 (TLS).
+    const navDef = await cdp.send('Page.navigate', { url: 'file:///' + INDEX_HTML.replace(/\\/g, '/') });
+    if (!navDef || navDef.error) throw new Error('Page.navigate (défaut) a échoué: ' + JSON.stringify(navDef));
+    const dlDef = Date.now() + 20000;
+    let ready0 = false;
+    while (Date.now() < dlDef && !ready0) {
+      try { ready0 = (await evalJs(cdp, "window.G && window.G.P2P && typeof window.G.P2P._brokerCfg === 'function' ? 'ready' : 'loading'")) === 'ready'; } catch (err) { /* page pas prête */ }
+      if (!ready0) await new Promise((res) => setTimeout(res, 200));
+    }
+    if (!ready0) throw new Error('ready timeout (nav défaut, G.P2P._brokerCfg)');
+    const cfgDef = JSON.parse(await evalJs(cdp, 'JSON.stringify(G.P2P._brokerCfg())'));
+    check('broker par défaut : cloud 0.peerjs.com:443 (secure)', cfgDef.host === '0.peerjs.com' && cfgDef.port === 443 && cfgDef.secure === true);
+
+    // Nav principale : override dev par query string (broker local 127.0.0.1:9000, insecure).
+    const nav = await cdp.send('Page.navigate', { url: 'file:///' + INDEX_HTML.replace(/\\/g, '/') + '?peerHost=127.0.0.1&peerPort=9000&peerSecure=false' });
     if (!nav || nav.error) throw new Error('Page.navigate a échoué: ' + JSON.stringify(nav));
     const deadline = Date.now() + 20000;
     let ready = false;
     while (Date.now() < deadline && !ready) {
       try {
-        ready = (await evalJs(cdp, "(window.G && window.G.version === '2.1.1' && window.G.UI && window.Peer && window.G.P2P) ? 'ready' : 'loading'")) === 'ready';
+        ready = (await evalJs(cdp, "(window.G && window.G.version === '2.2.1' && window.G.UI && window.Peer && window.G.P2P) ? 'ready' : 'loading'")) === 'ready';
       } catch { /* pas prêt */ }
       if (!ready) await new Promise((res) => setTimeout(res, 200));
     }
     if (!ready) throw new Error('ready timeout (G/UI/Peer/P2P)');
 
     // (a) Contrat DOM attendu par js/net.js.
-    const domIds = ['p2p-open', 'p2p-panel', 'p2p-host', 'p2p-join', 'p2p-code', 'p2p-status'];
+    const domIds = ['p2p-open', 'p2p-panel', 'p2p-host', 'p2p-join', 'p2p-code', 'p2p-status', 'p2p-solo'];
     const dom = JSON.parse(await evalJs(cdp, 'JSON.stringify(' + JSON.stringify(domIds) + '.map((i) => !!document.querySelector("#" + i)))'));
-    check('contrat DOM 2P : 6 ids (#p2p-*)', dom.every(Boolean));
+    check('contrat DOM 2P : 7 ids (#p2p-*)', dom.every(Boolean));
     const panelHidden = (await evalJs(cdp, "document.querySelector('#p2p-panel').hidden === true")) === true;
     check('panneau 2P masqué au chargement', panelHidden);
+    const soloHidden = (await evalJs(cdp, "document.querySelector('#p2p-solo') && document.querySelector('#p2p-solo').hidden === true")) === true;
+    check('bouton repli solo masqué au chargement', soloHidden);
 
     // (b) Surface G exposée par net.js / ui.js / game.js.
     const surf = JSON.parse(await evalJs(cdp, "JSON.stringify({ onLocal: typeof G.P2P.onLocalHumanMove === 'function', start2P: typeof G.UI.start2PGame === 'function', applyRemote: typeof G.UI.applyRemoteMove === 'function', remoteSwap: typeof G.remoteSwap === 'function', humanSwap: typeof G.humanSwap === 'function' })"));
     check('G.P2P.onLocalHumanMove est une fonction', surf.onLocal);
+    check('G.P2P._brokerCfg exposé (broker cloud par défaut)', (await evalJs(cdp, 'typeof G.P2P._brokerCfg === "function"')) === true);
     check('G.UI.start2PGame est une fonction', surf.start2P);
     check('G.UI.applyRemoteMove est une fonction', surf.applyRemote);
     check('G.remoteSwap et G.humanSwap exposés (game.js)', surf.remoteSwap && surf.humanSwap);

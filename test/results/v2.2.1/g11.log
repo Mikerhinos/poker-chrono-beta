@@ -1,0 +1,12 @@
+Chrome CDP prêt sur 127.0.0.1:9447 pour g11-noscore.mjs
+[ OK ] G.state absent du namespace public — {"hasState":false,"hasLastSeed":false}
+[ OK ] G.lastSeed absent du namespace public
+[ OK ] muter le snapshot ne modifie pas le plateau vivant
+[ OK ] tick(dt négatif) ignoré, timeLeft inchangé — {"ended":false,"aiMoved":false}
+[ OK ] tick(dt NaN) ignoré, timeLeft inchangé
+[ OK ] tick(dt positif) fonctionne après refus (consistance) — afterPositive=19900
+[ OK ] simulateGame : 0 erreur, partie terminée — []
+[ OK ] score humain final = barème du plateau final — human=29 ref=29
+[ OK ] score IA final = barème du plateau final — ai=185 ref=185
+FAILURES: 0
+RESULT: OK

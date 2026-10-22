@@ -1,0 +1,31 @@
+(node:16632) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/Mikerhinos/.openmausbot/workspaces/8b7108b4-e038-49f5-90ef-53f03bd46b30/poker-chrono/test/g3-swap.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to \\?\C:\Users\Mikerhinos\.openmausbot\workspaces\8b7108b4-e038-49f5-90ef-53f03bd46b30\poker-chrono\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok   miroir : 52 cartes, 15 + 15 + 37, toutes uniques
+  ok   miroir : main joueur == main IA (même sélection)
+  ok   miroir : aucune carte dupliquée dans les mains
+  ok   même seed → mêmes 15 cartes (joueur)
+  ok   même seed → mêmes 15 cartes (IA, miroir)
+  ok   aucune duplication dans le deal (67 cartes listées, 52 uniques : miroir)
+  ok   swap valide accepté — {"ok":true}
+  ok   swap valide : cellules 0 et 1 échangées
+  ok   swap valide : le reste du plateau inchangé
+  ok   swap valide : humanMoves incrémenté
+  ok   case identique : refus "self"
+  ok   case identique : plateau inchangé
+  ok   hors plateau : refus "out"
+  ok   hors plateau : plateau inchangé
+  ok   dépôts invalides (6 formes) → refus "invalid"
+  ok   dépôt undefined → refus "out" — {"ok":false,"reason":"out"}
+  ok   dépôts invalides : plateau inchangé
+  ok   non lancée : refus "not_running"
+  ok   tick jusqu’à terme
+  ok   terminée : refus "over"
+  ok   terminée : plateau inchangé
+  ok   simulation : 67 cartes listées, 52 uniques (miroir)
+  ok   simulation : plateaux toujours pleins (15+15)
+  ok   simulation : résultat cohérent (total = somme des lignes)
+
+[PORTE 3] 24 OK, 0 FAIL
+[PORTE 3] PORTE PASSÉE

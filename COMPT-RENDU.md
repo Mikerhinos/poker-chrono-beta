@@ -709,3 +709,55 @@ Logs intégraux : `test/results/v2.1.2-q/`.
 1. `g1-scores` : ENOENT `poker-rush` (préexistant, cf. § PATCH v2.1.2 — porte officielle g1 remplacée par `g1-adhoc.mjs` 41/41 en v2.1.2).
 2. **CRLF dans l'arbre v2.2-A** : 10 fichiers CRLF à `cb3077a` (`MANIFESTE.md`, `all.js`, `js/game.js`, `js/i18n.js`, `sha256-final-v212.txt`, `test/g16-p2p.mjs`, 3 preuves `test/results/`, `g8-recalibration.md`). Seuls `js/game.js` (CRLF=361) et `js/i18n.js` (CRLF=469) sont dans le scan g14 → normalisés LF dans ce commit (`sed -i 's/\r$//'`, whitespace-only, contenu byte-identique hors EOL, vérifié). Les 8 autres conservés tels quels (hors périmètre du fix, non bloquants).
 3. `node` : 1er appel d'un batch parfois refusé (stdin non-TTY) → réessai immédiat (cf. ANCRE-PARTS.md).
+
+## PATCH v2.2.1 — P2P : broker cloud par défaut + timeout 30 s + repli solo (2026-10-22)
+
+**Objectif** (brief NI4NI TASK-V22B-BROKER-20261022-01) : sur la branche beta v2.2, (1) broker de signalisation PeerJS **cloud par défaut** (`0.peerjs.com:443`, TLS) au lieu du local 127.0.0.1:9000, avec override dev par query string (`?peerHost=&peerPort=&peerSecure=`) ; (2) **timeout de connexion 30 s** ; (3) **repli solo en un clic** (bouton `#p2p-solo` affiché sur timeout/erreur de signalisation) ; code salle 4–6 caractères inchangé. `G.version` → **2.2.1**. Aucun push (NI4NI pousse après revue).
+
+**Fichiers modifiés (19)** :
+- `js/net.js` : `brokerCfg()` (défaut cloud + override query string + validation ports), `CONNECT_TIMEOUT_MS = 30000`, `armTimeout()`/`disarmTimeout()`, `showSoloFallback()`, câblage host+join (timeout + repli sur `status_err_no_server`), `_brokerCfg` exposé.
+- `index.html` : bouton `#p2p-solo` (masqué au chargement, `data-i18n="p2p_solo_btn"`).
+- `js/i18n.js` : 2 nouvelles clés × 5 langues (`status_timeout`, `p2p_solo_btn`) — `status_err_no_server` préexistante.
+- `js/game.js` : `G.version` → `2.2.1` (seule occurrence, ligne 352).
+- `all.js` : reconstruite (7 scripts dans l'ordre des `<script>`, séparateur `\n`) — 90358 octets, 0 CR.
+- `test/g4-colors.mjs`, `g5-rownames.mjs`, `g5-ui.mjs`, `g6-audio.mjs`, `g7-fx.mjs`, `g9-boards.mjs`, `g11-noscore.mjs`, `g12-seed.mjs`, `g13-best.mjs`, `g14-innertest.mjs`, `g8-scan.mjs`, `g15-i18n.mjs` (en-tête), `poc-repro.mjs` : pin version → 2.2.1.
+- `test/g16-p2p.mjs` : 2 pins → 2.2.1 + 3 nouveaux checks (broker défaut cloud 0.peerjs.com:443, bouton solo masqué au chargement, `G.P2P._brokerCfg` exposé) + `p2p-solo` ajouté au contrat DOM (7 ids).
+
+**Suite v2.2.1** (23 commandes : 22 node + 1 ESLint, `test/results/v2.2.1/`) :
+
+| Porte | Commande | Résultat |
+|---|---|---|
+| g1-scores | `node test/g1-scores.js` | RC=0 — [PORTE 1] 41 OK, 0 FAIL, PORTE PASSÉE |
+| g3-swap | `node test/g3-swap.js` | RC=0 — [PORTE 3] 24 OK, 0 FAIL, PORTE PASSÉE |
+| g8-scan | `node test/g8-scan.mjs` | RC=0 — taille totale HTML+CSS+JS **257187 octets** (fenêtre 100–256 Ko) |
+| g14-innertest | `node test/g14-innertest.mjs` | RC=0 — RESULT: OK |
+| go-logic | `node test/go-logic.mjs` | RC=0 — go-logic : 18 ok, 0 fail |
+| max-board | `node test/max-board.mjs` | RC=0 — [[POLE 3]] PORTE PASSÉE |
+| w3c | `node test/w3c.mjs` | RC=0 — w3c : 3 ok, 0 fail |
+| g4-colors | `node test/run-headless.mjs g4-colors.mjs 9441` | RC=0 — [PORTE 4] PORTE PASSÉE |
+| g5-rownames | `node test/run-headless.mjs g5-rownames.mjs 9442` | RC=0 — [PORTE 5] PORTE PASSÉE |
+| g5-ui | `node test/run-headless.mjs g5-ui.mjs 9443` | RC=0 — [PORTE 5] PORTE PASSÉE |
+| g6-audio | `node test/run-headless.mjs g6-audio.mjs 9444` | RC=0 — [PORTE 6] PORTE PASSÉE |
+| g7-fx | `node test/run-headless.mjs g7-fx.mjs 9445` | RC=0 — [PORTE 7] PORTE PASSÉE |
+| g9-boards | `node test/run-headless.mjs g9-boards.mjs 9446` | RC=0 — RESULT: OK |
+| g11-noscore | `node test/run-headless.mjs g11-noscore.mjs 9447` | RC=0 — RESULT: OK |
+| g12-seed | `node test/run-headless.mjs g12-seed.mjs 9448` | RC=0 — RESULT: OK |
+| g13-best | `node test/run-headless.mjs g13-best.mjs 9449` | RC=0 — RESULT: OK |
+| g15-i18n | `node test/run-headless.mjs g15-i18n.mjs 9450` | RC=0 — **30 ok, 0 fail** |
+| go-ui | `node test/run-headless.mjs go-ui.mjs 9451` | RC=0 — go-ui : 11 ok, 0 fail |
+| go-ui-85 | `node test/run-headless.mjs go-ui-85.mjs 9452` | RC=0 — go-ui-85 : 6 ok, 0 fail |
+| g5-run (Chrome auto-spawn) | `node test/g5-run.mjs` | RC=0 — [PORTE 5] PORTE PASSÉE |
+| g16-p2p | `node test/run-headless.mjs g16-p2p.mjs 9347` | RC=0 — **19 OK, FAILURES: 0, RESULT: OK** (broker local 127.0.0.1:9000 spawné par le gate, CDP 9347) |
+| bench 900 (launcher) | `node test/g2g4-headless.js` | RC=0 — 900 parties en 112.6 s, erreurs JS 0 |
+| ESLint porte 23 | `node node_modules/eslint/bin/eslint.js --no-config-lookup --config test/results/v2.2-a/eslint.concat.config.mjs all.js` | **RC=0, 0 erreur** (sortie vide) — `all.js` 90358 octets, flat config v2.2-a (7 scripts + global `Peer`) |
+
+**Bench 900 (sha256 normalisé)** : `312841cd81911460d998d4b4d6a026cfab11b4c7efca4559a8443bc828bc357a` — **identique à la référence v2.1.2/v2.2** (`312841cd81911460d998d4b4d6a026cfab11b4c7efca4559a8443bc828bc357a`) — aucune régression de simulation.
+
+**MANIFESTE + sha256** : régénérés sur l'arbre v2.2.1 final — 48 hashes recalculés par re-lecture binaire ; `sha256-final-v212.txt` (format machine `<n>|<sha256> *<path>`) réaligné sur le même périmètre 48.
+
+**Preuves** : `test/results/v2.2.1/` — `suite-run-v221.txt` (log intégral des 23 commandes), `eslint-gate23-v221.txt` (porte 23), `bench900-run-v221.txt` (sortie brute), `bench900-normalized.sha256` (preuve d'identité), logs de portes.
+
+**Anomalies** :
+1. `stdin` non-TTY de la session : tout appel `node` avec `< /dev/null` (contournement documenté dans ANCRE-PARTS.md) — driver `run-suite-v221.sh` (scratch, non commité).
+2. `eslint-gate23-v22f.txt` (v2.2-flagfix) vide : état préexistant documenté (sortie ESLint vide = 0 erreur) — inchangé.
+3. `p2p-code` `maxlength` existant = 8 ; périmètre 4–6 caractères garanti côté logique (net.js `code.toUpperCase().slice(0, 6)`) — non modifié (hors périmètre).

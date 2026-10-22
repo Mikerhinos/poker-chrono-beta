@@ -26,13 +26,13 @@ async function main() {
     let ready = false;
     while (Date.now() < deadline && !ready) {
       try {
-        ready = (await evalJs(cdp, "(document.readyState === 'complete' && window.G && window.G.version === '2.1.1' && window.G.UI) ? 'ready' : 'loading'")) === 'ready';
+        ready = (await evalJs(cdp, "(document.readyState === 'complete' && window.G && window.G.version === '2.2.1' && window.G.UI) ? 'ready' : 'loading'")) === 'ready';
       } catch (e) { /* pas prêt */ }
       if (!ready) await new Promise((res) => setTimeout(res, 200));
     }
     if (!ready) throw new Error('ready timeout');
 
-    /* ---- v2.1.1 décision D — check de layout déterministe à 1920x1080 (CSS seul) ----
+    /* ---- v2.2.1 décision D — check de layout déterministe à 1920x1080 (CSS seul) ----
        Le contenu du plateau joueur (#board-human : h2, .rows, .total) doit être aligné
        à droite dans son cadre ; le bouton GO reste à droite de la ligne de score ;
        le plateau IA (#board-ai) n'est pas modifié et reste immédiatement à droite du

@@ -27,7 +27,7 @@ async function main() {
     let ready = false;
     while (Date.now() < deadline && !ready) {
       try {
-        ready = (await evalJs(cdp, "(document.readyState === 'complete' && window.G && window.G.version === '2.1.1' && window.G.UI) ? 'ready' : 'loading'")) === 'ready';
+        ready = (await evalJs(cdp, "(document.readyState === 'complete' && window.G && window.G.version === '2.2.1' && window.G.UI) ? 'ready' : 'loading'")) === 'ready';
       } catch (e) { /* pas prêt */ }
       if (!ready) await new Promise((res) => setTimeout(res, 200));
     }

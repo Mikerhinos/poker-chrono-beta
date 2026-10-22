@@ -7,7 +7,7 @@
 [ OK ] D6 : plateau IA non modifié (ligne .row à <= 8 px du bord gauche intérieur du cadre, grille de cartes à 134 px de celle-ci : colonnes de nom + gap) — rowA.gauche=984 px, cadre gauche int.=984 px, grille cartes gauche=1118 px, track0=128 px
 [ OK ] D7 : mobile <900 px — 1 colonne (layout restant utilisable) — grid-template-columns=749px
 [ OK ] D8 : mobile — plateau IA sous le plateau joueur — aTop=604, hBottom=586
-file: C:\Users\Mikerhinos\Poker-Chrono\index.html
+file: C:\Users\Mikerhinos\.openmausbot\workspaces\8b7108b4-e038-49f5-90ef-53f03bd46b30\poker-chrono\index.html
 seed 1000: h=14 ia=14 OK
 seed 1001: h=6 ia=6 OK
 seed 1002: h=22 ia=22 OK

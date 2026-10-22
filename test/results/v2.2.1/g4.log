@@ -1,0 +1,22 @@
+Chrome CDP prêt sur 127.0.0.1:9441 pour g4-colors.mjs
+  ok   état initial : dataset = 2 — {"ds":"2","sel":"2","ls":null}
+  ok   état initial : select = 2
+  ok   cartes présentes dans le DOM (4 atouts) — s0..s3 rendues
+  ok   mode 2 : cœur (s1) rouge #b3352c — rgb(179, 53, 44)
+  ok   mode 2 : carreau (s2) rouge #b3352c — rgb(179, 53, 44)
+  ok   mode 2 : pique (s0) noir #1a1f2b — rgb(26, 31, 43)
+  ok   mode 2 : trèfle (s3) noir #1a1f2b — rgb(26, 31, 43)
+  ok   mode 4 : dataset = 4 — {"ds":"4","sel":"4","ls":"4"}
+  ok   mode 4 : persisté en localStorage = 4
+  ok   mode 4 : pique (s0) noir — rgb(26, 31, 43)
+  ok   mode 4 : cœur (s1) rouge — rgb(179, 53, 44)
+  ok   mode 4 : carreau (s2) vert — rgb(31, 157, 85)
+  ok   mode 4 : trèfle (s3) bleu — rgb(36, 86, 201)
+  ok   retour mode 2 : dataset = 2, LS = 2 — {"ds":"2","sel":"2","ls":"2"}
+  ok   persistance : après reload dataset = 4 — {"ds":"4","sel":"4","ls":"4"}
+  ok   persistance : après reload select = 4
+  ok   persistance : après reload LS = 4
+  ok   0 erreur JS console — 0 erreur(s)
+
+[PORTE 4] 18 OK, 0 FAIL
+[PORTE 4] PORTE PASSÉE

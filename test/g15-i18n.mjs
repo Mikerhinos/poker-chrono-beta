@@ -1,4 +1,4 @@
-// PORTE 15 — i18n (v2.1.1) : 5 dictionnaires complets, EN par défaut,
+// PORTE 15 — i18n (v2.2.1) : 5 dictionnaires complets, EN par défaut,
 // persistance localStorage, <html lang> dynamique, aucune chaîne FR hors
 // dictionnaires sur la page EN.
 // Usage : node test/run-headless.mjs test/g15-i18n.mjs [port]

@@ -1,0 +1,44 @@
+Chrome CDP prêt sur 127.0.0.1:9446 pour g9-boards.mjs
+== G9 — 30 seeds × 2 plateaux, barème interne cohérent (v2) ==
+[ OK ] D1 : bord droit de la grille de cartes (.rows + cellules) du plateau joueur à <= 8 px du bord droit intérieur du cadre (1920x1080) — grille droit=936 px, .rows droit=936 px, cadre droit int.=936 px (d=0 px)
+[ OK ] D2 : bord droit de la ligne de score (.total) à <= 8 px du bord droit intérieur du cadre — total droit=936 px
+[ OK ] D3 : bord droit du titre (h2) à <= 8 px du bord droit intérieur du cadre — h2 droit=936 px
+[ OK ] D4 : bouton GO à droite de la ligne de score, dans le cadre — go=[854.125..936], pts.droit=847.484375, cadre droit int.=936
+[ OK ] D5 : plateau joueur immédiatement à gauche du plateau IA (écart = gap grid 18 px) — human.droit=951, ai.gauche=969, gap=18
+[ OK ] D6 : plateau IA non modifié (ligne .row à <= 8 px du bord gauche intérieur du cadre, grille de cartes à 134 px de celle-ci : colonnes de nom + gap) — rowA.gauche=984 px, cadre gauche int.=984 px, grille cartes gauche=1118 px, track0=128 px
+[ OK ] D7 : mobile <900 px — 1 colonne (layout restant utilisable) — grid-template-columns=749px
+[ OK ] D8 : mobile — plateau IA sous le plateau joueur — aTop=604, hBottom=586
+file: C:\Users\Mikerhinos\.openmausbot\workspaces\8b7108b4-e038-49f5-90ef-53f03bd46b30\poker-chrono\index.html
+seed 1000: h=14 ia=14 OK
+seed 1001: h=6 ia=6 OK
+seed 1002: h=22 ia=22 OK
+seed 1003: h=52 ia=52 OK
+seed 1004: h=44 ia=44 OK
+seed 1005: h=14 ia=14 OK
+seed 1006: h=37 ia=37 OK
+seed 1007: h=14 ia=14 OK
+seed 1008: h=37 ia=37 OK
+seed 1009: h=6 ia=6 OK
+seed 1010: h=6 ia=6 OK
+seed 1011: h=6 ia=6 OK
+seed 1012: h=14 ia=14 OK
+seed 1013: h=22 ia=22 OK
+seed 1014: h=52 ia=52 OK
+seed 1015: h=22 ia=22 OK
+seed 1016: h=60 ia=60 OK
+seed 1017: h=6 ia=6 OK
+seed 1018: h=6 ia=6 OK
+seed 1019: h=22 ia=22 OK
+seed 1020: h=22 ia=22 OK
+seed 1021: h=37 ia=37 OK
+seed 1022: h=22 ia=22 OK
+seed 1023: h=30 ia=30 OK
+seed 1024: h=22 ia=22 OK
+seed 1025: h=14 ia=14 OK
+seed 1026: h=6 ia=6 OK
+seed 1027: h=14 ia=14 OK
+seed 1028: h=37 ia=37 OK
+seed 1029: h=14 ia=14 OK
+[ OK ] 60 plateaux : somme des lignes = boardScore = barème
+FAILURES: 0
+RESULT: OK

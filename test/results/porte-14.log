@@ -2,7 +2,7 @@
 [ OK ] aucune occurrence innerHTML dans le fichier — count=1
 [ OK ] rendu des lignes via createElement
 [ OK ] labels via textContent
-[ OK ] version 2.1.1
+[ OK ] version 2.2.1
 [ OK ] xoshiro128ss présent (fix H1)
 [ OK ] seed CSPRNG présent (fix H1)
 [ OK ] pas de handle d’état public (fix H2)

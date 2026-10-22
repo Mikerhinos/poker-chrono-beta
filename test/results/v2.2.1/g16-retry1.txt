@@ -1,0 +1,2 @@
+Chrome CDP prêt sur 127.0.0.1:9347 pour g16-p2p.mjs
+ERREUR: G is not defined

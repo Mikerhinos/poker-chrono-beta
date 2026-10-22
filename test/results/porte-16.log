@@ -1,6 +1,9 @@
-[ OK ] contrat DOM 2P : 6 ids (#p2p-*)
+[ OK ] broker par défaut : cloud 0.peerjs.com:443 (secure)
+[ OK ] contrat DOM 2P : 7 ids (#p2p-*)
 [ OK ] panneau 2P masqué au chargement
+[ OK ] bouton repli solo masqué au chargement
 [ OK ] G.P2P.onLocalHumanMove est une fonction
+[ OK ] G.P2P._brokerCfg exposé (broker cloud par défaut)
 [ OK ] G.UI.start2PGame est une fonction
 [ OK ] G.UI.applyRemoteMove est une fonction
 [ OK ] G.remoteSwap et G.humanSwap exposés (game.js)

@@ -116,8 +116,58 @@
   //   ready      : Promise (canal de données ouvert),
   //   send(msg), on(fn), onError(fn), destroy()
   // }.
+  /* Broker PeerJS : par défaut, le serveur cloud public 0.peerjs.com (port 443, TLS).
+   * Dev-only : l'override passe par la query string ?peerHost=&peerPort=&peerSecure=
+   * (la suite de tests pointe alors sur un broker local 127.0.0.1:9000 — test/g16-p2p.mjs).
+   * Pas de secret en dur : aucune clé d'API, aucune URL de service propriétaire. */
+  const CONNECT_TIMEOUT_MS = 30000;
+  let timeoutId = null;
+
+  function brokerCfg() {
+    const d = { host: '0.peerjs.com', port: 443, secure: true };
+    const qs = (window.location.search || '').replace(/^[?]/, '');
+    const pairs = qs ? qs.split('&') : [];
+    for (let i = 0; i < pairs.length; i++) {
+      const kv = pairs[i].split('=');
+      if (kv.length < 2) continue;
+      const k = kv[0];
+      const v = kv.slice(1).join('=');
+      if (k === 'peerHost' && v) d.host = v;
+      else if (k === 'peerPort') {
+        const n = parseInt(v, 10);
+        if (!Number.isNaN(n) && n > 0 && n < 65536) d.port = n;
+      } else if (k === 'peerSecure') {
+        if (v === 'true') d.secure = true;
+        else if (v === 'false') d.secure = false;
+      }
+    }
+    return d;
+  }
+
+  /* Timeout de connexion (30 s) : au-delà, statut explicite + bouton repli solo. */
+  function armTimeout() {
+    disarmTimeout();
+    timeoutId = setTimeout(function () {
+      timeoutId = null;
+      setStatus('status_timeout');
+      showSoloFallback(); // repli solo en un clic : l'utilisateur démarre la partie
+    }, CONNECT_TIMEOUT_MS);
+  }
+
+  function disarmTimeout() {
+    if (timeoutId !== null) {
+      clearTimeout(timeoutId);
+      timeoutId = null;
+    }
+  }
+
+  function showSoloFallback() {
+    const btn = document.getElementById('p2p-solo');
+    if (btn) btn.hidden = false;
+  }
+
   function connect(opts) {
-    const o = Object.assign({ host: '127.0.0.1', port: 9000, secure: false }, opts || {});
+    const o = Object.assign(brokerCfg(), opts || {});
     const cfg = { host: o.host, port: o.port, secure: o.secure, key: 'peerjs' };
     let registeredResolve, readyResolve;
     const p2p = {
@@ -168,6 +218,9 @@
   }
 
   function disconnect() {
+    disarmTimeout();
+    const soloB = document.getElementById('p2p-solo');
+    if (soloB) soloB.hidden = true;
     if (currentPeer) {
       try { currentPeer.p2p.destroy(); } catch (err) { /* déjà détruit */ }
     }
@@ -229,8 +282,10 @@
     setStatus('status_connecting');
     currentPeer = connect({ hostId: code });
     currentPeer.p2p.on(onMessage);
-    currentPeer.p2p.onError(() => { setStatus('status_err_no_server'); });
+    currentPeer.p2p.onError(() => { setStatus('status_err_no_server'); showSoloFallback(); });
+    armTimeout();
     currentPeer.p2p.ready.then(() => {
+      disarmTimeout();
       // canal ouvert (le visiteur est connecté) : génère la graine, envoie
       // l'init et démarre la partie (les deux côtés, mêmes 15 cartes).
       const seed = genSeed();
@@ -247,8 +302,10 @@
     setStatus('status_connecting');
     currentPeer = connect({ joinId: code });
     currentPeer.p2p.on(onMessage);
-    currentPeer.p2p.onError(() => { setStatus('status_err_no_server'); });
+    currentPeer.p2p.onError(() => { setStatus('status_err_no_server'); showSoloFallback(); });
+    armTimeout();
     currentPeer.p2p.ready.then(() => {
+      disarmTimeout();
       // canal ouvert : attend l'init de l'hôte (traité dans onMessage).
       setStatus('status_waiting_host');
     });
@@ -267,6 +324,7 @@
     const hostBtn = document.getElementById('p2p-host');
     const joinBtn = document.getElementById('p2p-join');
     const codeInput = document.getElementById('p2p-code');
+    const soloBtn = document.getElementById('p2p-solo');
     if (openBtn && panel) {
       openBtn.addEventListener('click', () => { panel.hidden = !panel.hidden; });
     }
@@ -287,6 +345,14 @@
         if (code) join(code);
       });
     }
+    if (soloBtn) {
+      soloBtn.addEventListener('click', () => {
+        soloBtn.hidden = true;
+        const p2 = document.getElementById('p2p-panel');
+        if (p2) p2.hidden = true;
+        if (G.UI && G.UI.startGame) G.UI.startGame();
+      });
+    }
   }
 
   G.P2P = {
@@ -302,6 +368,7 @@
     host,
     join,
     onLocalHumanMove,
+    _brokerCfg: brokerCfg,
     _setStatus: setStatus,
     _currentPeer: () => currentPeer
   };

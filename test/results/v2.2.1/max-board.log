@@ -1,0 +1,11 @@
+  ok   max(HAND_SCORES) = 500 (quinte flush)
+  ok   borne sup plateau = 3 × 500 = 1500
+  ok   plateau : 15 cartes distinctes
+  ok   3 lignes quinte flush (500 chacune)
+  ok   plateau construit : boardScore = 1500 (max théorique atteint)
+  simulation 20000 deals : min=6, P1=6, mediane=22, P99=112, max=504
+  ok   simulation : max observé ≤ 1500 (borne respectée)
+  ok   simulation : tous les plateaux pleins (score > 0)
+
+[[POLE 3]] 7 OK, 0 FAIL
+[[POLE 3]] PORTE PASSÉE

@@ -1,0 +1,8 @@
+Chrome CDP prêt sur 127.0.0.1:9452 pour go-ui-85.mjs
+  ok  partie lancée (90 s)
+  ok  GO toujours actif a t=85 s (jusqua la fin)
+  ok  clic GO effectué (t≈85 s)
+  ok  GO à t=85 s : bonus = 5 pts
+  ok  total = plateau + 5
+  ok  détail en fin : 5 pts de bonus affichés
+go-ui-85 : 6 ok, 0 fail

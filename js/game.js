@@ -349,7 +349,7 @@ function swapCells(board, i, j) {
   }
 
   globalThis.G = {
-    version: '2.1.1',
+    version: '2.2.1',
     // barème verbatim
     RANKS, RANK_LABEL, SUIT_LABEL, SUIT_NAME, HAND_SCORES, HAND_LABEL,
     isValidCard, evaluate5, isFull, rowScore, boardScore, boardBreakdown,
