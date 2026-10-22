@@ -1893,14 +1893,53 @@ status_err_seed_mismatch: 'Stato iniziale non corrispondente (trucco?)'}
     applyColors();
   });
 
-  /* v2.1.1 : langue (EN par défaut, persistance localStorage, <html lang> dynamique). */
-  const langSel = $('#lang');
+  /* v2.1.2 flagfix : menu de langue custom (drapeaux).
+   * Le <select> natif ne rend pas les drapeaux (emoji Regional Indicator) dans
+   * sa popup sous Windows (Opera PC) — menu DOM custom ARIA à la place.
+   * Persistance + <html lang> restent inchangés, toujours via G.I18N. */
+  const LANG_LABELS = {
+    de: '🇩🇪 Deutsch',
+    en: '🇬🇧 English',
+    es: '🇪🇸 Español',
+    fr: '🇫🇷 Français',
+    it: '🇮🇹 Italiano'
+  };
 
-  langSel.value = G.I18N.getLang();
+  const langBtn = $('#lang-btn');
+  const langList = $('#lang-list');
 
-  langSel.addEventListener('change', (e) => {
-    G.I18N.setLang(e.target.value);
-    renderAll();
+  function syncLangBtn() {
+    langBtn.textContent = LANG_LABELS[G.I18N.getLang()] || LANG_LABELS.en;
+  }
+
+  function setLangMenuOpen(open) {
+    langBtn.setAttribute('aria-expanded', String(open));
+    langList.hidden = !open;
+  }
+
+  syncLangBtn();
+
+  langBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setLangMenuOpen(langList.hidden);
+  });
+
+  langList.addEventListener('click', (e) => {
+    const opt = e.target.closest('li[data-lang]');
+    if (!opt) return;
+    if (G.I18N.setLang(opt.dataset.lang)) {
+      syncLangBtn();
+      renderAll();
+    }
+    setLangMenuOpen(false);
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#lang')) setLangMenuOpen(false);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') setLangMenuOpen(false);
   });
 
   /* v2 : contrôles audio (toggles ON/OFF + sliders séparés, persistés). */

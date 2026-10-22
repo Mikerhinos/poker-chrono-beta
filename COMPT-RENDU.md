@@ -678,3 +678,34 @@ Logs intégraux : `test/results/v2.1.2-q/`.
 1. `g1-scores` : `C:\Users\Mikerhinos\poker-rush\index.html` absent de la machine (préexistant, cf. §2 de ce compte-rendu — la porte g1 officielle est remplacée par `g1-adhoc.mjs` 41/41 en v2.1.2).
 2. `stdin` non-TTY de la session bash : tout appel `node` exige `< /dev/null` (contournement documenté dans ANCRE-PARTS.md) ; 1er appel node d'un batch parfois refusé → réessai immédiat.
 3. Drift de hashs préexistant : `8d8ec06` (topo-tri `js/*.js`) avait modifié 5 fichiers `js/*.js` sans mettre à jour `MANIFESTE.md` ni `sha256-final-v212.txt` — recalculé par re-lecture dans ce commit.
+## PATCH v2.2 — flagfix menu de langue (cherry-pick `24a266d` → `d0caf9c`) (2026-10-22)
+
+**Objectif** : intégrer le flagfix v2.1.2 (menu de langue custom / drapeaux) dans la branche beta `v2.2` (testeurs Windows/Opera). Contraintes : aucun push (repo beta = NI4NI), main inchangé, assertions g15 non modifiées.
+
+**Cherry-pick** : `git cherry-pick 24a266d` sur `v2.2` @ `cb3077a` (v2.2-A). 1 seul conflit : `css/base.css` — fin de fichier, blocs `#p2p-*` (ours/v2.2-A) et `.lang-menu`/`.lang-list` (theirs/flagfix), aucune collision sémantique. Résolution : conservation des deux blocs (HEAD d'abord), marqueurs retirés ; blocs extraits via `git show :2:`/`git show :3:` et vérifiés **byte-identiques** aux sources. `index.html` et `js/ui.js` auto-fusionnés : 35 ids uniques, 0 dupliqué, bindings lang + p2p conservés. → commit **`d0caf9c`**.
+
+**Suite v2.2-flagfix** (22 portes, `test/results/v2.2-flagfix/`) :
+
+| Porte | Résultat |
+|---|---|
+| g1-scores | **FAIL environnemental** (ENOENT `C:\Users\Mikerhinos\poker-rush\index.html`) — préexistant, code g1 inchangé par le fix — consigné, non corrigé |
+| g2–g13 | FAILURES: 0 / ok (RC=0) |
+| g14 (scan) | tentative 1 FAIL « pas de CR (LF) » → tentative 2 **FAILURES: 0, RESULT: OK** (voir anomalie 2) |
+| g15-i18n | **30 ok / 0 fail** (RC=0) — assertions menu-lang du flagfix actives |
+| g16-p2p | tentative 1 RC=1 (CDP absent) → tentative 2 `node test/run-headless.mjs g16-p2p.mjs 9347` : **17 OK, FAILURES: 0, RESULT: OK** |
+| g2g4-headless, w3c, g5-run | verts (w3c 3/3) |
+| bench 900 | 900 parties en 112.5 s, 0 erreur JS, PORTE 2/4 ok |
+| ESLint porte 23 | **RC=0, 0 erreur** (re-vérifiée post-normalisation EOL) |
+
+**Bench 900 (sha256 normalisé)** : `312841cd81911460d998d4b4d6a026cfab11b4c7efca4559a8443bc828bc357a` — **identique à la référence v2.1.2-flagfix** (aucune régression de simulation ; les 4 lignes de warning Node `MODULE_TYPELESS_PACKAGE_JSON` du run v2.2, artifact runtime non déterministe, sont retirées de la normalisation).
+
+**ESLint porte 23** : `all.js` reconstruite = 7 scripts dans l'ordre des `<script>` d'index.html v2.2 (`deck, game, i18n, audio, fx, ui, net`), séparateur `\n`, **87 501 octets, 0 CR** + flat config `test/results/v2.2-a/eslint.concat.config.mjs` (7 scripts + global `Peer`) → **0 erreur** (RC=0).
+
+**MANIFESTE + sha256** : régénérés sur l'arbre v2.2 final — 48 hashes recalculés par re-lecture binaire ; `sha256-final-v212.txt` (format machine `<n>|<sha256> *<path>`) réaligné sur le même périmètre 48.
+
+**Preuves** : `test/results/v2.2-flagfix/` — `suite-run-v22f.txt` (log intégral, toutes tentatives y compris échecs), `eslint-gate23-v22f.txt` (porte 23), `bench900-run-v22f.txt` (sortie brute), `bench900-normalized.sha256` (preuve d'identité), logs de portes.
+
+**Anomalies** :
+1. `g1-scores` : ENOENT `poker-rush` (préexistant, cf. § PATCH v2.1.2 — porte officielle g1 remplacée par `g1-adhoc.mjs` 41/41 en v2.1.2).
+2. **CRLF dans l'arbre v2.2-A** : 10 fichiers CRLF à `cb3077a` (`MANIFESTE.md`, `all.js`, `js/game.js`, `js/i18n.js`, `sha256-final-v212.txt`, `test/g16-p2p.mjs`, 3 preuves `test/results/`, `g8-recalibration.md`). Seuls `js/game.js` (CRLF=361) et `js/i18n.js` (CRLF=469) sont dans le scan g14 → normalisés LF dans ce commit (`sed -i 's/\r$//'`, whitespace-only, contenu byte-identique hors EOL, vérifié). Les 8 autres conservés tels quels (hors périmètre du fix, non bloquants).
+3. `node` : 1er appel d'un batch parfois refusé (stdin non-TTY) → réessai immédiat (cf. ANCRE-PARTS.md).

@@ -1,0 +1,52 @@
+(node:1080) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/Mikerhinos/Poker-Chrono/test/g1-scores.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to \\?\C:\Users\Mikerhinos\Poker-Chrono\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok   quinte flush 7-8-9-10-V pique — → quinte_flush (500)
+  ok   quatre d’as — → quatre (300)
+  ok   full RRRDD — → full (150)
+  ok   couleur sans quinte — → couleur (100)
+  ok   quinte (sans couleur) — → quinte (75)
+  ok   quinte 10-J-Q-D-A (A haute) — → quinte (75)
+  ok   brelan — → brelan (40)
+  ok   double paire — → double_paire (25)
+  ok   paire — → paire (10)
+  ok   carte haute — → carte_haute (2)
+  ok   quinte 2-3-4-5-6 (échelle basse) — → quinte (75)
+  ok   quinte 6-7-8-9-10 (échelle basse 2) — → quinte (75)
+  ok   quinte wheel A-2-3-4-5 — → quinte (75)
+  ok   quinte flush 2-3-4-5-6 pique — → quinte_flush (500)
+  ok   couleur avec basses 2-5-6-8-K cœur — → couleur (100)
+  ok   brelan 2-2-2-3-R — → brelan (40)
+  ok   double paire 2-2-3-3-K — → double_paire (25)
+  ok   paire 2-2 + kickers 5-8-K — → paire (10)
+  ok   carte haute 2-4-6-8-K — → carte_haute (2)
+  ok   pas de quinte enroulée (A-7-8-9-10) — → carte_haute (2)
+  ok   A-2-3-5-6 n’est pas une quinte (pas de wheel, pas consécutif) — → carte_haute (2)
+  ok   quatre (300) > full (150)
+  ok   ordre complet du barème
+  ok   éval de 4 cartes → erreur
+  ok   carte invalide (r=15) → erreur
+  ok   carte invalide (s=5) → erreur
+  ok   carte invalide (r=1) → erreur
+  ok   cartes basses v2.1 valides (r=2..6)
+  ok   boardScore = 500+300+2 = 802 — → 802
+  ok   boardBreakdown 3 lignes étiquetées
+node:fs:539
+    return binding.readFileUtf8(path, stringToFlags(options.flag));
+                   ^
+
+Error: ENOENT: no such file or directory, open 'C:\Users\Mikerhinos\poker-rush\index.html'
+    at readFileSync (node:fs:539:20)
+    at file:///C:/Users/Mikerhinos/Poker-Chrono/test/g1-scores.js:80:14
+    at ModuleJob.run (node:internal/modules/esm/module_job:569:25)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async node:internal/modules/esm/loader:650:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\Mikerhinos\\poker-rush\\index.html'
+}
+
+Node.js v26.7.0

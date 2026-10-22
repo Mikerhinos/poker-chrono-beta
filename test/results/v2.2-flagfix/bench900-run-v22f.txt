@@ -1,0 +1,79 @@
+(node:6104) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/Mikerhinos/Poker-Chrono/test/g2g4-headless.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to \\?\C:\Users\Mikerhinos\Poker-Chrono\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  facile: score IA moyen 136.09, score humain moyen 27.70, victoires IA 284/300 (94.7%), humain 9, égalité 7, erreurs JS 0, scores humains distincts 21
+  normal: score IA moyen 167.89, score humain moyen 27.70, victoires IA 298/300 (99.3%), humain 1, égalité 1, erreurs JS 0, scores humains distincts 21
+  difficile: score IA moyen 209.57, score humain moyen 27.70, victoires IA 299/300 (99.7%), humain 1, égalité 0, erreurs JS 0, scores humains distincts 21
+
+  total : 900 parties en 112.5 s
+  stats 900 parties (humains) : min=6, P1 (90e pct)=52.00, médiane=22.00, max=215
+  GO anti-abus : min + 85 = 91 vs P1 - 30 = 52.00 → cap recalibré = floor(P1 - min - 30) = 16
+  ok   PORTE 2 : ≥ 900 parties jouées — 900 parties
+  ok   PORTE 2 : 0 erreur JS — 0 erreur(s)
+  ok   PORTE 4 : score IA moyen croissant — 136.09 < 167.89 < 209.57
+  ok   PORTE 4 : taux de victoire IA croissant — 94.7% < 99.3% < 99.7%
+  ok   PORTE 4 : scores non constants (≥ 5 valeurs distinctes par difficulté) — 21 / 21 / 21 valeurs distinctes
+  ok   PORTE 4 : pas d’égalités systématiques (≤ 50% égalités par difficulté) — égalités : 7, 1, 0 / 300
+
+[PORTE 2/4] 6 OK, 0 FAIL
+[PORTE 2/4] PORTE PASSÉE
+{
+  "total": 900,
+  "totalErrors": 0,
+  "wall": "112.5",
+  "stats": {
+    "n": 900,
+    "min": 6,
+    "p1": 52,
+    "median": 22,
+    "max": 215
+  },
+  "results": {
+    "facile": {
+      "n": 300,
+      "errors": 0,
+      "avgHuman": 27.7,
+      "avgAI": 136.08666666666667,
+      "winAI": 0.9466666666666667,
+      "wins": {
+        "human": 9,
+        "ai": 284,
+        "draw": 7
+      },
+      "distinctHuman": 21,
+      "minHuman": 6,
+      "maxHuman": 215
+    },
+    "normal": {
+      "n": 300,
+      "errors": 0,
+      "avgHuman": 27.7,
+      "avgAI": 167.89333333333335,
+      "winAI": 0.9933333333333333,
+      "wins": {
+        "human": 1,
+        "ai": 298,
+        "draw": 1
+      },
+      "distinctHuman": 21,
+      "minHuman": 6,
+      "maxHuman": 215
+    },
+    "difficile": {
+      "n": 300,
+      "errors": 0,
+      "avgHuman": 27.7,
+      "avgAI": 209.57,
+      "winAI": 0.9966666666666667,
+      "wins": {
+        "human": 1,
+        "ai": 299,
+        "draw": 0
+      },
+      "distinctHuman": 21,
+      "minHuman": 6,
+      "maxHuman": 215
+    }
+  }
+}

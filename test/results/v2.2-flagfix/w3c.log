@@ -1,0 +1,4 @@
+  ok  0 id en double (35 ids au total)
+  ok  0 heading vide (6 headings au parse statique)
+  ok  W3C Nu : 0 erreur (0 info/warning)
+w3c : 3 ok, 0 fail

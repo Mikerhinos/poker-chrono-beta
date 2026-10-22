@@ -1,0 +1,5 @@
+Bench 900 — Poker-Chrono v2.2 (flagfix 24a266d cherry-pické en d0caf9c)
+Procédure : stdout+stderr, ligne « total : 900 parties en X s » et 4 warnings Node MODULE_TYPELESS_PACKAGE_JSON (artifact runtime, non déterministe) retirés, champ JSON « wall » → 111.5, SHA-256 UTF-8.
+hash v2.2-flagfix : 312841cd81911460d998d4b4d6a026cfab11b4c7efca4559a8443bc828bc357a
+référence v2.1.2-flagfix archivée : 312841cd81911460d998d4b4d6a026cfab11b4c7efca4559a8443bc828bc357a
+identité : OUI (JSON de simulation byte-identique à la référence)

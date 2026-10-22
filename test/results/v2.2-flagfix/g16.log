@@ -1,0 +1,19 @@
+Chrome CDP prêt sur 127.0.0.1:9347 pour g16-p2p.mjs
+[ OK ] contrat DOM 2P : 6 ids (#p2p-*)
+[ OK ] panneau 2P masqué au chargement
+[ OK ] G.P2P.onLocalHumanMove est une fonction
+[ OK ] G.UI.start2PGame est une fonction
+[ OK ] G.UI.applyRemoteMove est une fonction
+[ OK ] G.remoteSwap et G.humanSwap exposés (game.js)
+[ OK ] remoteSwap 0→4 : board ai modifié, aiMoves=1
+[ OK ] remoteSwap invalide (from==to) refusé, sans effet
+[ OK ] WebRTC : deux Peer connectés (ICE/SDP, data channel) — 
+[ OK ] init : graine 128 bits reçue du host
+[ OK ] deal miroir : human == ai des deux cotes
+[ OK ] deal miroir : plateau identique des deux cotes
+[ OK ] move : guest 0→4 appliqué sur son board humain
+[ OK ] move : reçu par le host (f/t valides)
+[ OK ] move : remoteSwap du host sur son board ai (aiMoves=1)
+[ OK ] invariant post-move : board ai(host) == board humain(guest)
+FAILURES: 0
+RESULT: OK

@@ -1,0 +1,8 @@
+Chrome CDP prêt sur 127.0.0.1:9442 pour g5-rownames.mjs
+  ok   après deal : 6 noms = 6 mains évaluées — OK
+  ok   24 vérifications en jeu : 100 % des noms = main évaluée — 0 écart sur 24 itérations
+  ok   état final : 6 noms = 6 mains évaluées — OK
+  ok   0 erreur JS console — 0 erreur(s)
+
+[PORTE 5] 4 OK, 0 FAIL
+[PORTE 5] PORTE PASSÉE

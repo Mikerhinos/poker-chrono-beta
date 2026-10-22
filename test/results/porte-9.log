@@ -5,8 +5,8 @@
 [ OK ] D4 : bouton GO à droite de la ligne de score, dans le cadre — go=[854.125..936], pts.droit=847.484375, cadre droit int.=936
 [ OK ] D5 : plateau joueur immédiatement à gauche du plateau IA (écart = gap grid 18 px) — human.droit=951, ai.gauche=969, gap=18
 [ OK ] D6 : plateau IA non modifié (ligne .row à <= 8 px du bord gauche intérieur du cadre, grille de cartes à 134 px de celle-ci : colonnes de nom + gap) — rowA.gauche=984 px, cadre gauche int.=984 px, grille cartes gauche=1118 px, track0=128 px
-[ OK ] D7 : mobile <900 px — 1 colonne (layout restant utilisable) — grid-template-columns=764px
-[ OK ] D8 : mobile — plateau IA sous le plateau joueur — aTop=587, hBottom=569
+[ OK ] D7 : mobile <900 px — 1 colonne (layout restant utilisable) — grid-template-columns=749px
+[ OK ] D8 : mobile — plateau IA sous le plateau joueur — aTop=604, hBottom=586
 file: C:\Users\Mikerhinos\Poker-Chrono\index.html
 seed 1000: h=14 ia=14 OK
 seed 1001: h=6 ia=6 OK
