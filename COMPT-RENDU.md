@@ -761,3 +761,72 @@ Logs intégraux : `test/results/v2.1.2-q/`.
 1. `stdin` non-TTY de la session : tout appel `node` avec `< /dev/null` (contournement documenté dans ANCRE-PARTS.md) — driver `run-suite-v221.sh` (scratch, non commité).
 2. `eslint-gate23-v22f.txt` (v2.2-flagfix) vide : état préexistant documenté (sortie ESLint vide = 0 erreur) — inchangé.
 3. `p2p-code` `maxlength` existant = 8 ; périmètre 4–6 caractères garanti côté logique (net.js `code.toUpperCase().slice(0, 6)`) — non modifié (hors périmètre).
+
+## PATCH v2.2.2 — P2P : handshake Ready bidirectionnel + countdown synchronisé hôte→visiteur + champ `type` init + propagation options `start2PGame` (2026-10-23, TASK-V22C-READY-SYNC-20261022-01)
+
+**Objectif** (brief NI4NI) : sur la branche beta v2.2, compléter le mode 2 joueurs — (1) champ `type` dans l'init ; (2) `start2PGame(seed, difficulty, time)` ; (3) bouton « Ready ? » sur les 2 écrans, départ quand les 2 ont cliqué oui ; (4) compte à rebours « 3...2...1...GO ! » **synchronisé sur les 2 appareils** puis deal ; (5) test 2P via le **vrai chemin hôte→visiteur** ; suite complète RC=0 ; MANIFESTE tous hashs ; version **2.2.2**. Aucun push (NI4NI pousse la beta après vérification).
+
+**Fixs livrés** :
+1. Champ `type` dans l'init : `buildInit(seed, d, time)` → `{p:'pc2p/v1', v:2, type:'init', seed, d, time, boards, boardHash}` ; `validateInit` recalcule depuis la graine.
+2. Handshake Ready bidirectionnel (`js/net.js`, 19 101 o, +153/−24 vs v2.2.1) : `localReady`/`peerReady`, `markReady`/`markPeerReady`, `resetHandshake`, `maybeDeal` — deal unique quand les 2 sont prêts (idempotent côté visiteur, garde `started`/`dealing`).
+3. Countdown synchronisé hôte→visiteur : `runCountdown` envoie `{type:'countdown', n}` à chaque tick ; `onMessage` côté guest (garde `role='guest' && !started && Number.isInteger(n)` → `setStatus('p2p_cd',{n})`) ; aucun effet sur l'état game, seul `init` démarre.
+4. Propagation options : `start2PGame(seed, difficulty, time)` (`js/ui.js` +4) → `beginGame` ; `state()` expose `seed`.
+5. Bouton `#p2p-ready` : ajouté `index.html` L61 (`data-i18n="p2p_ready_btn"`, `hidden`) ; click câblé `net.js` L421 → `markReady` (hôte ET visiteur).
+6. i18n : clés P2P × 5 langues (`p2p_ready_btn`, `p2p_wait_ready`, `p2p_wait_opp`, `p2p_cd`, `status_*`…) — `js/i18n.js` : **81 clés × 5 langues** (FR, EN, ES, IT, DE), parité exacte des jeux de clés vérifiée par évaluation de l'objet `DICTS`.
+7. Version **2.2.2** : `js/game.js` L352 `version: '2.2.2'` (seule occurrence) + 11 tests pinnés bumpés (g4, g5-rownames, g5-ui, g6, g7, g9, g11, g12, g13, g14, poc-repro).
+8. `test/cdp.mjs` : multi-onglets — `fetchList`, `connectTab(url, matchFn, tries)` → `{id, send, close, setEventHandler, nextEvent}`, `connect` alias compat.
+9. `test/g16-p2p.mjs` : réécriture complète — vrai chemin hôte→visiteur, 2 onglets CDP (17 151 o).
+10. `all.js` reconstruite (règle `join('\n')` des 7 modules `deck,game,i18n,audio,fx,ui,net`) : **95 831 octets, sha256 `964cb582f6ec9d1ee226eb8195b32cdebfc4bca568643546dbf14cb494d62957`** (0 CR).
+
+**Bugs corrigés en chemin** (trouvés pendant la réécriture de g16) :
+- `PROTOCOL = 'pc2p/v1'` (pas `'pc2p'`) — check (e) de g16 corrigé.
+- Expressions de `waitFor` strictement booléennes (`!!(...)`) — le driver CDP teste la truthy via le protocole.
+- `evalJs` hors scope dans `waitFor` : import statique module-level requis (le contexte de l'`await` n'est pas le module).
+- Check boards : `boards.human` = matrice 3 lignes × 5 cartes (15 cartes), pas 8 ni 15 cellules plates.
+
+**Fichiers modifiés (22)** (état git avant commit v2.2.2) : `all.js`, `index.html`, `js/game.js`, `js/i18n.js`, `js/net.js`, `js/ui.js`, `test/cdp.mjs`, `test/g4-colors.mjs`, `test/g5-rownames.mjs`, `test/g5-ui.mjs`, `test/g6-audio.mjs`, `test/g7-fx.mjs`, `test/g9-boards.mjs`, `test/g11-noscore.mjs`, `test/g12-seed.mjs`, `test/g13-best.mjs`, `test/g14-innertest.mjs`, `test/g16-p2p.mjs` (réécriture), `test/poc-repro.mjs`, `test/results/porte-13.log`, `test/results/porte-14.log`, `test/results/porte-16.log` (régénérés par la suite).
+
+**Suite v2.2.2** (23 commandes : 22 node + 1 ESLint, `test/results/v2.2.2/`, fin 12:39:59) :
+
+| Porte | Commande | Résultat |
+|---|---|---|
+| g1-scores | `node test/g1-scores.js < /dev/null` | RC=0 — [PORTE 1] 41 OK, 0 FAIL, PORTE PASSÉE |
+| g3-swap | `node test/g3-swap.js < /dev/null` | RC=0 — [PORTE 3] 24 OK, 0 FAIL, PORTE PASSÉE |
+| g8-scan | `node test/g8-scan.mjs < /dev/null` | RC=0 — taille totale HTML+CSS+JS **262 752 octets** (fenêtre 100–256 Ko ; FAIL interne consigné, cf. Anomalies) |
+| g14-innertest | `node test/g14-innertest.mjs < /dev/null` | RC=0 — RESULT: OK (11 OK, FAILURES 0) |
+| go-logic | `node test/go-logic.mjs < /dev/null` | RC=0 — go-logic : 18 ok, 0 fail |
+| max-board | `node test/max-board.mjs < /dev/null` | RC=0 — [[POLE 3]] PORTE PASSÉE (7 OK) |
+| w3c | `node test/w3c.mjs < /dev/null` | RC=0 — w3c : 3 ok, 0 fail |
+| g4-colors | `node test/run-headless.mjs g4-colors.mjs 9441 < /dev/null` | RC=0 — [PORTE 4] PORTE PASSÉE (18 OK) |
+| g5-rownames | `node test/run-headless.mjs g5-rownames.mjs 9442 < /dev/null` | RC=0 — [PORTE 5] PORTE PASSÉE (4 OK) |
+| g5-ui | `node test/run-headless.mjs g5-ui.mjs 9443 < /dev/null` | RC=0 — [PORTE 5] PORTE PASSÉE (20 OK) |
+| g6-audio | `node test/run-headless.mjs g6-audio.mjs 9444 < /dev/null` | RC=0 — [PORTE 6] PORTE PASSÉE (16 OK) |
+| g7-fx | `node test/run-headless.mjs g7-fx.mjs 9445 < /dev/null` | RC=0 — [PORTE 7] PORTE PASSÉE (8 OK) |
+| g9-boards | `node test/run-headless.mjs g9-boards.mjs 9446 < /dev/null` | RC=0 — RESULT: OK (8 layout + 60 boards) |
+| g11-noscore | `node test/run-headless.mjs g11-noscore.mjs 9447 < /dev/null` | RC=0 — RESULT: OK (9 OK) |
+| g12-seed | `node test/run-headless.mjs g12-seed.mjs 9448 < /dev/null` | RC=0 — RESULT: OK (10 OK) |
+| g13-best | `node test/run-headless.mjs g13-best.mjs 9449 < /dev/null` | RC=0 — RESULT: OK (6 OK) |
+| g15-i18n | `node test/run-headless.mjs g15-i18n.mjs 9450 < /dev/null` | RC=0 — **30 ok, 0 fail** (clés obligatoires) |
+| go-ui | `node test/run-headless.mjs go-ui.mjs 9451 < /dev/null` | RC=0 — go-ui : 11 ok, 0 fail |
+| go-ui-85 | `node test/run-headless.mjs go-ui-85.mjs 9452 < /dev/null` | RC=0 — go-ui-85 : 6 ok, 0 fail |
+| g5-run (Chrome auto-spawn) | `node test/g5-run.mjs < /dev/null` | RC=0 — [PORTE 5] PORTE PASSÉE (20 OK) |
+| g16-p2p | `node test/run-headless.mjs g16-p2p.mjs 9347 < /dev/null` | RC=0 — **31 OK, FAILURES: 0, RESULT: OK** (vrai chemin hôte→visiteur, peerjs-server 127.0.0.1:9000, CDP 9347) |
+| bench 900 (launcher) | `node test/g2g4-headless.js < /dev/null` | RC=0 — 900 parties en 111.8 s (wall), erreurs JS 0 |
+| ESLint porte 23 | `node node_modules/eslint/bin/eslint.js --no-config-lookup --config test/results/v2.2-a/eslint.concat.config.mjs all.js` | **RC=0, 0 erreur** (`eslint-p23.log` vide) — `all.js` 95 831 octets, flat config v2.2-a (7 scripts + global `Peer`) |
+
+**SUITE: 23/23 RC=0 — OK** (`suite-run-v222.txt`, `progress.log`).
+
+**g16 (détail, 31 checks)** : 2 onglets CDP (A = hôte, B = visiteur), peerjs-server 127.0.0.1:9000 — bouton Ready visible des 2 côtés, clicks Ready ×2, départ ×2 (game running des 2 côtés), options hôte propagées (normal/20 s), deal miroir hôte==visiteur, coup visiteur via Pointer Events réels → `onLocalHumanMove` → `remoteSwap` hôte (`aiMoves=1`), invariants post-move (board ai hôte == board human visiteur ; board human hôte == board ai visiteur), **countdown synchronisé 3→2→1 observé des 2 côtés** (séquence visiteur strictement décroissante [3,2,1]), statut final « Connected » des 2 côtés, `G.version` 2.2.2, `buildInit` `type='init'` ok, `validateInit`/`validateMove`/`genSeed` ok. 2 runs consécutifs RC=0 (12:20–12:25) + 1 run dans la suite.
+
+**Bench 900 (sha256 normalisé)** : `312841cd81911460d998d4b4d6a026cfab11b4c7efca4559a8443bc828bc357a` — **identique à la référence v2.1.2 / v2.2 / v2.2.1** — aucune régression de simulation. Normalisation : retrait de la ligne « total : 900 parties en X s » et des 4 lignes de warning Node `MODULE_TYPELESS_PACKAGE_JSON`, `"wall"` → `"111.5"` ; re-vérifiée 2× (déterministe). Preuve : `test/results/v2.2.2/bench900-normalized.sha256`.
+
+**MANIFESTE + sha256** : régénérés sur l'arbre v2.2.2 final — 48 hashes recalculés par re-lecture binaire ; `sha256-final-v212.txt` (format machine `<n>|<sha256> *<path>`) réaligné sur le même périmètre 48.
+
+**Preuves** : `test/results/v2.2.2/` — 26 fichiers : `suite-run-v222.txt` (log intégral des 23 commandes), `progress.log`, 21 logs de portes, `eslint-p23.log` (vide = 0 erreur), `g16-p2p.log`, `g2g4-bench900.log` (sortie brute bench), `bench900-normalized.sha256` (preuve d'identité).
+
+**Anomalies** :
+1. `g8-scan` : FAIL interne « taille totale (index.html + css/ + js/) entre 100 et 256 Ko — 262 752 octets » (+608 o au-dessus de la fenêtre 256 Ko ; +5 565 o vs v2.2.1 (257 187 o), dû à l'ajout de `js/net.js` et à la croissance `js/i18n.js`, `js/ui.js`, `index.html`). La porte consigne le FAIL au log **sans le propager en code de sortie** (`summary()` de `test/lib.mjs` ne fixe pas l'exit code) → processus RC=0, suite 23/23. Observation de budget d'assets, signalée, non bloquante.
+2. CRLF : **0 CR sur l'ensemble du périmètre v2.2.2** (48 table + 3 hors table) — vérifié par re-lecture binaire. Les mentions CRLF du MANIFESTE v2.2.1 (g15/g8/g16) ne sont pas corroborées par les blobs de `2adc36e` (0 CR sur g15/g8 ; les hashs v2.2.1 étaient calculés sur du contenu LF) ; `test/g16-p2p.mjs` a été réécrit en LF dans v2.2.2.
+3. Résidu « 2.2.1 » : 0 dans `js/`, `index.html`, `css/` ; 4 commentaires d'en-tête documentaires dans `test/` (g8-scan L1, g15-i18n L1, g9-boards L35, g14-innertest L2) — références historiques, non fonctionnelles.
+4. Erreur intermittente « stdin is not a tty » sur certains `node -e`/lancements sans redirection → contournée par `< /dev/null` (documenté ANCRE-PARTS.md). Non bloquante.
+5. Tentatives : AT-V22C-#1 (142 tool calls, aucun livrable, arrêt mid-task — cause inconnue) ; AT-V22C-#2 (stoppée par l'opérateur à 101 % de contexte après 400+ min, 3 fichiers modifiés laissés sur disque) ; AT-V22C-#3 (contexte frais : g16 réécrit + passé 2×, suite lancée 12:27, terminée 23/23 RC=0 à 12:39:59, arrêt juste après la fin de la suite) ; reprise **AT-V22C-#3b** (celle-ci) : consolidation des preuves, MANIFESTE, COMPTE-RENDU, commit.

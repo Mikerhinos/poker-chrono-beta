@@ -1,0 +1,27 @@
+Chrome CDP prêt sur 127.0.0.1:9443 pour g5-ui.mjs
+  ok   page chargée, G v2 (snapshots UI) présent
+  ok   partie facile : drag & drop a modifié le plateau (31 drops)
+  ok   partie facile : écran final affiché
+  ok   partie facile : 3 lignes décomposées par joueur — humain 3, IA 3
+  ok   partie facile : timer à 0.0 s au final — 0.0 s
+  ok   partie facile : scores affichés = scores calculés — affichés 22/105, calculés 22/105
+    partie facile : humain 22 pts, IA 105 pts, vainqueur ai — Done — 29 human swap(s), 9 AI swap(s).
+  ok   partie normal : drag & drop a modifié le plateau (31 drops)
+  ok   partie normal : écran final affiché
+  ok   partie normal : 3 lignes décomposées par joueur — humain 3, IA 3
+  ok   partie normal : timer à 0.0 s au final — 0.0 s
+  ok   partie normal : scores affichés = scores calculés — affichés 14/177, calculés 14/177
+    partie normal : humain 14 pts, IA 177 pts, vainqueur ai — Done — 29 human swap(s), 19 AI swap(s).
+  ok   partie difficile : drag & drop a modifié le plateau (31 drops)
+  ok   partie difficile : écran final affiché
+  ok   partie difficile : 3 lignes décomposées par joueur — humain 3, IA 3
+  ok   partie difficile : timer à 0.0 s au final — 0.0 s
+  ok   partie difficile : scores affichés = scores calculés — affichés 30/52, calculés 30/52
+    partie difficile : humain 30 pts, IA 52 pts, vainqueur ai — Done — 29 human swap(s), 39 AI swap(s).
+  ok   dépôt hors plateau → message d’annulation — "Dropped off the board: cancelled."
+  ok   dépôt sur le plateau IA → refus (lecture seule) — "Refused: the AI board is read-only."
+  ok   partie de refus : final atteint
+  ok   0 erreur JS console (3 parties + refus) — 0 erreur(s)
+
+[PORTE 5] 20 OK, 0 FAIL
+[PORTE 5] PORTE PASSÉE

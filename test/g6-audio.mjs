@@ -15,7 +15,7 @@ const page = (expr) => evalJs(cdp, expr);
 
 async function waitForPage() {
   for (let i = 0; i < 100; i++) {
-    const r = await page(`(document.readyState === 'complete' && window.G && window.G.version === '2.2.1' && window.G.UI) ? 'ready' : 'loading'`);
+    const r = await page(`(document.readyState === 'complete' && window.G && window.G.version === '2.2.2' && window.G.UI) ? 'ready' : 'loading'`);
     if (r === 'ready') return;
     await sleep(200);
   }

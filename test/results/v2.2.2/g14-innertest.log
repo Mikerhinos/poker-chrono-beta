@@ -1,0 +1,14 @@
+== G14 — Scan statique du rendu dynamique ==
+[ OK ] aucune occurrence innerHTML dans le fichier — count=1
+[ OK ] rendu des lignes via createElement
+[ OK ] labels via textContent
+[ OK ] version 2.2.2
+[ OK ] xoshiro128ss présent (fix H1)
+[ OK ] seed CSPRNG présent (fix H1)
+[ OK ] pas de handle d’état public (fix H2)
+[ OK ] tick dt borné (fix M1)
+[ OK ] best-score validé (fix M2)
+[ OK ] split : aucune référence externe (src/href locaux js/… css/… seuls autorisés, zéro http/https)
+[ OK ] pas de CR (LF)
+FAILURES: 0
+RESULT: OK

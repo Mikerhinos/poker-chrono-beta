@@ -329,9 +329,9 @@
 
   /* v2.2 P2P : demarrage a partir du seed 128 bits partags (4xuint32).
    * L'IA locale est gelée ; les coups du distant arrivent via applyRemoteMove. */
-  function start2PGame(seed) {
+  function start2PGame(seed, difficulty, time) {
     twoPlayer = true;
-    beginGame('normal', 30, seed, true);
+    beginGame(difficulty || 'normal', time || 30, seed, true);
     status(G.I18N.t('status_connected'));
   }
 

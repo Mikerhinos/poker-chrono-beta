@@ -2,7 +2,7 @@
 const WebSocket = globalThis.WebSocket;
 if (!WebSocket) throw new Error('Node ≥ 22 requis (WebSocket global manquant)');
 
-export async function connect(url, tries = 40) {
+async function fetchList(url, tries = 40) {
   let list = null;
   for (let i = 0; i < tries; i++) {
     try {
@@ -18,8 +18,14 @@ export async function connect(url, tries = 40) {
     await new Promise((r) => setTimeout(r, 300));
   }
   if (!list) throw new Error('aucune liste CDP (port ' + url + ')');
-  const page = list.find((t) => t.type === 'page');
-  if (!page) throw new Error('aucun onglet page');
+  return list;
+}
+
+// Connecte à l'onglet CDP choisi par matchFn (multi-onglets : test g16-p2p).
+export async function connectTab(url, matchFn, tries = 100) {
+  const list = await fetchList(url, tries);
+  const page = list.find((t) => t.type === 'page' && matchFn(t));
+  if (!page) throw new Error('aucun onglet page correspondant');
   const ws = new WebSocket(page.webSocketDebuggerUrl);
   let id = 0;
   const pending = new Map();
@@ -49,6 +55,7 @@ export async function connect(url, tries = 40) {
   await new Promise((r) => { ws.onopen = r; });
 
   return {
+    id: page.id,
     send,
     close: () => ws.close(),
     setEventHandler(fn) { eventHandler = fn; },
@@ -70,4 +77,9 @@ export async function evalJs(cdp, expression) {
     throw new Error('Exception page : ' + d);
   }
   return r.result.value;
+}
+
+// Compatibilité historique : premier onglet page de l'instance CDP.
+export async function connect(url, tries = 40) {
+  return connectTab(url, () => true, tries);
 }

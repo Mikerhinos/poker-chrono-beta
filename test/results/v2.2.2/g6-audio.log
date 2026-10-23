@@ -1,0 +1,20 @@
+Chrome CDP prêt sur 127.0.0.1:9444 pour g6-audio.mjs
+  ok   G.AUDIO défini
+  ok   init headless OK (ensure() sans exception)
+  ok   AudioContext créé headless — {"ready":true,"ctx":true}
+  ok   musique OFF par défaut (chargement frais : musicOn === false, aucune entrée LS) — {"m":false,"s":true,"lm":null,"pressed":"false","cls":"audio-btn"}
+  ok   toggle musique reflète OFF au chargement (aria-pressed=false, pas de classe .on) — {"m":false,"s":true,"lm":null,"pressed":"false","cls":"audio-btn"}
+  ok   SFX ON par défaut
+  ok   musique 1er clic : armement ON (v2.1) : état + LS + aria-pressed — {"m":true,"lm":"1","pressed":"true"}
+  ok   musique 2e clic : OFF
+  ok   musique 3e clic : ON (retour)
+  ok   SFX 1er clic : armement ON (v2.1) : état + LS — {"s":true,"ls":"1"}
+  ok   SFX 2e clic : OFF
+  ok   slider volume musique = 0.33 — 0.33
+  ok   sliders séparés (musique 0.33 / SFX 0.5) — {"m":0.33,"s":0.5}
+  ok   9 SFX invocables sans exception — OK
+  ok   partie complète avec audio : final atteint
+  ok   0 erreur JS console (audio headless) — 0 erreur(s)
+
+[PORTE 6] 16 OK, 0 FAIL
+[PORTE 6] PORTE PASSÉE

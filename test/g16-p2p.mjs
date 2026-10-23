@@ -1,16 +1,16 @@
-// G13 — Fondation P2P WebRTC (milestone V2.2-A).
-// Preuve de bout en bout, dans le navigateur (CDP, Chrome headless) :
-//   - signalisation PeerJS locale (serveur peerjs-server sur 127.0.0.1:9000, /peerjs) ;
-//   - deux Peer connectés (ICE/SDP + data channel) ;
-//   - protocole init (graine 128 bits) + move (coups) ;
-//   - deal miroir (deck.js : même graine -> mêmes 15 cartes, human == ai) ;
-//   - machine à états (game.js : createGame + start + humanSwap/remoteSwap).
-// Un seul onglet, deux instances Peer (moteur WebRTC interne) : c'est le
-// schéma de test standard d'une connexion P2P dans un même navigateur.
+// PORTE 16 — P2P 2 joueurs : VRAI chemin hôte→visiteur (v2.2.2).
+// Preuve de bout en bout, dans le navigateur (CDP, Chrome headless, DEUX onglets) :
+//   - signalisation PeerJS locale (peerjs-server sur 127.0.0.1:9000, /peerjs) ;
+//   - tab A = page HÔTE, tab B = page VISITEUR (vraie session WebRTC inter-onglets) ;
+//   - handshake Ready bidirectionnel : bouton #p2p-ready cliqué des DEUX côtés ;
+//   - compte à rebours 3-2-1 SYNCHRONISÉ : l'hôte re-sert chaque tick, le visiteur l'affiche ;
+//   - init (type:'init', graine 128 bits, options hôte) -> onMessage visiteur -> deal miroir ;
+//   - coup humain du visiteur via l'UI (Pointer Events) -> onLocalHumanMove -> remoteSwap hôte.
 import { spawn } from 'node:child_process';
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { connect, connectTab, evalJs } from './cdp.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -25,15 +25,15 @@ function check(name, ok, info) {
   if (!ok) failures++;
   lines.push((ok ? '[ OK ] ' : '[ FAIL] ') + name + (info !== undefined ? ' — ' + info : ''));
 }
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
 // Démarre le serveur de signalisation PeerJS local et attend son message de
-// démarrage. Le chemin doit être /peerjs : le client PeerJS (js/net.js) y va
-// par défaut (chemin '/' + 'peerjs').
+// démarrage. Pas de --path : le montage par défaut '/' + le suffixe 'peerjs'
+// du serveur donnent l'URL WS ws://127.0.0.1:9000/peerjs, exactement ce que
+// construit le client (js/net.js, chemin par défaut '/'). Avec --path /peerjs
+// le serveur écouterait sur /peerjs/peerjs (double suffixe) et le handshake
+// échouerait.
 function startSignaling() {
-  // Pas de --path : le montage par défaut '/' + le suffixe 'peerjs' du serveur
-  // donnent l'URL WS ws://127.0.0.1:9000/peerjs, exactement ce que construit le
-  // client (js/net.js, chemin par défaut '/'). Avec --path /peerjs le serveur
-  // écouterait sur /peerjs/peerjs (double suffixe) et le handshake échouerait.
   const args = [join(ROOT, 'node_modules', 'peerjs-server', 'bin', 'peerjs'), '-p', String(SIG_PORT)];
   const proc = spawn(process.execPath, args, { stdio: ['ignore', 'pipe', 'pipe'] });
   let out = '';
@@ -48,128 +48,183 @@ function startSignaling() {
   });
 }
 
+async function waitFor(cdp, expr, timeoutMs, name) {
+  const t0 = Date.now();
+  for (;;) {
+    try { if (await evalJs(cdp, expr) === true) return; } catch { /* pas encore prêt */ }
+    if (Date.now() - t0 > timeoutMs) throw new Error('timeout: ' + name);
+    await sleep(250);
+  }
+}
+
+const READY_EXPR = "!!(window.G && window.G.version === '2.2.2' && window.G.UI && window.Peer && window.G.P2P && window.G.P2P._test)";
+const OBSERVER = `(() => {
+  window.__g16 = { status: [], last: '' };
+  const st = document.querySelector('#p2p-status');
+  if (!st) return 'no-status';
+  const mo = new MutationObserver(() => {
+    const t = st.textContent;
+    if (t !== window.__g16.last) { window.__g16.last = t; window.__g16.status.push(t); }
+  });
+  mo.observe(st, { childList: true, characterData: true, subtree: true });
+  return 'observer';
+})()`;
+const GUEST_SWAP = `(async () => {
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const pe = (type, x, y, el) => {
+    const e = new PointerEvent(type, { bubbles: true, cancelable: true, pointerId: 1, pointerType: 'mouse', clientX: x, clientY: y, button: 0, buttons: type === 'pointerup' ? 0 : 1 });
+    el.dispatchEvent(e);
+  };
+  const cell = (i) => document.querySelector('#board-human .cell[data-idx="' + i + '"]');
+  for (let i = 0; i < 80; i++) {
+    const from = (i * 3 + 1) % 15;
+    let to = (i * 7 + 2) % 15;
+    if (to === from) to = (to + 1) % 15;
+    const fromCell = cell(from);
+    const card = fromCell && fromCell.querySelector('.card');
+    const target = cell(to);
+    if (!card || !target) continue;
+    const cr = card.getBoundingClientRect();
+    pe('pointerdown', cr.left + cr.width / 2, cr.top + cr.height / 2, card);
+    target.scrollIntoView();
+    const tr = target.getBoundingClientRect();
+    pe('pointermove', tr.left + tr.width / 2, tr.top + tr.height / 2, card);
+    pe('pointerup', tr.left + tr.width / 2, tr.top + tr.height / 2, target);
+    await sleep(60);
+    if (G.UI.humanMoves() >= 1) return true;
+  }
+  return false;
+})()`;
+
 async function main() {
-  const { connect, evalJs } = await import('./cdp.mjs');
   const sig = await startSignaling();
-  let cdp = null;
+  let host = null;
+  let guest = null;
   try {
-    cdp = await connect(process.argv[2] || '127.0.0.1:9347');
     // (a0) Broker par défaut (page sans query string) : cloud 0.peerjs.com:443 (TLS).
-    const navDef = await cdp.send('Page.navigate', { url: 'file:///' + INDEX_HTML.replace(/\\/g, '/') });
+    host = await connect(process.argv[2] || '127.0.0.1:9347');
+    const navDef = await host.send('Page.navigate', { url: 'file:///' + INDEX_HTML.replace(/\\/g, '/') });
     if (!navDef || navDef.error) throw new Error('Page.navigate (défaut) a échoué: ' + JSON.stringify(navDef));
-    const dlDef = Date.now() + 20000;
-    let ready0 = false;
-    while (Date.now() < dlDef && !ready0) {
-      try { ready0 = (await evalJs(cdp, "window.G && window.G.P2P && typeof window.G.P2P._brokerCfg === 'function' ? 'ready' : 'loading'")) === 'ready'; } catch (err) { /* page pas prête */ }
-      if (!ready0) await new Promise((res) => setTimeout(res, 200));
-    }
-    if (!ready0) throw new Error('ready timeout (nav défaut, G.P2P._brokerCfg)');
-    const cfgDef = JSON.parse(await evalJs(cdp, 'JSON.stringify(G.P2P._brokerCfg())'));
+    await waitFor(host, "!!(window.G && window.G.P2P && typeof window.G.P2P._brokerCfg === 'function')", 20000, 'ready (nav défaut)');
+    const cfgDef = JSON.parse(await evalJs(host, 'JSON.stringify(G.P2P._brokerCfg())'));
     check('broker par défaut : cloud 0.peerjs.com:443 (secure)', cfgDef.host === '0.peerjs.com' && cfgDef.port === 443 && cfgDef.secure === true);
 
-    // Nav principale : override dev par query string (broker local 127.0.0.1:9000, insecure).
-    const nav = await cdp.send('Page.navigate', { url: 'file:///' + INDEX_HTML.replace(/\\/g, '/') + '?peerHost=127.0.0.1&peerPort=9000&peerSecure=false' });
+    // (a) Onglet HÔTE : navigation avec override dev (broker local 127.0.0.1:9000, insecure).
+    const mainUrl = 'file:///' + INDEX_HTML.replace(/\\/g, '/') + '?peerHost=127.0.0.1&peerPort=' + SIG_PORT + '&peerSecure=false';
+    const nav = await host.send('Page.navigate', { url: mainUrl });
     if (!nav || nav.error) throw new Error('Page.navigate a échoué: ' + JSON.stringify(nav));
-    const deadline = Date.now() + 20000;
-    let ready = false;
-    while (Date.now() < deadline && !ready) {
-      try {
-        ready = (await evalJs(cdp, "(window.G && window.G.version === '2.2.1' && window.G.UI && window.Peer && window.G.P2P) ? 'ready' : 'loading'")) === 'ready';
-      } catch { /* pas prêt */ }
-      if (!ready) await new Promise((res) => setTimeout(res, 200));
-    }
-    if (!ready) throw new Error('ready timeout (G/UI/Peer/P2P)');
+    await waitFor(host, READY_EXPR, 20000, 'ready hôte (G/UI/Peer/P2P)');
 
-    // (a) Contrat DOM attendu par js/net.js.
-    const domIds = ['p2p-open', 'p2p-panel', 'p2p-host', 'p2p-join', 'p2p-code', 'p2p-status', 'p2p-solo'];
-    const dom = JSON.parse(await evalJs(cdp, 'JSON.stringify(' + JSON.stringify(domIds) + '.map((i) => !!document.querySelector("#" + i)))'));
-    check('contrat DOM 2P : 7 ids (#p2p-*)', dom.every(Boolean));
-    const panelHidden = (await evalJs(cdp, "document.querySelector('#p2p-panel').hidden === true")) === true;
-    check('panneau 2P masqué au chargement', panelHidden);
-    const soloHidden = (await evalJs(cdp, "document.querySelector('#p2p-solo') && document.querySelector('#p2p-solo').hidden === true")) === true;
-    check('bouton repli solo masqué au chargement', soloHidden);
+    // (b) Onglet VISITEUR : 2e onglet CDP sur la même page (même broker local).
+    const created = await host.send('Target.createTarget', { url: mainUrl });
+    if (!created || created.error || !created.targetId) throw new Error('Target.createTarget a échoué: ' + JSON.stringify(created));
+    guest = await connectTab(process.argv[2] || '127.0.0.1:9347', (t) => t.id !== host.id, 150);
+    await waitFor(guest, READY_EXPR, 20000, 'ready visiteur (G/UI/Peer/P2P)');
+    check('deux onglets CDP ouverts (hôte + visiteur), même page', true);
 
-    // (b) Surface G exposée par net.js / ui.js / game.js.
-    const surf = JSON.parse(await evalJs(cdp, "JSON.stringify({ onLocal: typeof G.P2P.onLocalHumanMove === 'function', start2P: typeof G.UI.start2PGame === 'function', applyRemote: typeof G.UI.applyRemoteMove === 'function', remoteSwap: typeof G.remoteSwap === 'function', humanSwap: typeof G.humanSwap === 'function' })"));
-    check('G.P2P.onLocalHumanMove est une fonction', surf.onLocal);
-    check('G.P2P._brokerCfg exposé (broker cloud par défaut)', (await evalJs(cdp, 'typeof G.P2P._brokerCfg === "function"')) === true);
-    check('G.UI.start2PGame est une fonction', surf.start2P);
-    check('G.UI.applyRemoteMove est une fonction', surf.applyRemote);
-    check('G.remoteSwap et G.humanSwap exposés (game.js)', surf.remoteSwap && surf.humanSwap);
+    // (c) Contrat DOM (hôte) : 8 ids P2P (dont #p2p-ready, masqué au chargement).
+    const domIds = ['p2p-open', 'p2p-panel', 'p2p-host', 'p2p-join', 'p2p-code', 'p2p-status', 'p2p-solo', 'p2p-ready'];
+    const dom = await evalJs(host, JSON.stringify(domIds) + '.map((i) => !!document.querySelector("#" + i))');
+    check('contrat DOM 2P : 8 ids (#p2p-*)', dom.every(Boolean), JSON.stringify(dom));
+    check('panneau 2P masqué au chargement', await evalJs(host, "document.querySelector('#p2p-panel').hidden === true"));
+    check('bouton repli solo masqué au chargement', await evalJs(host, "document.querySelector('#p2p-solo').hidden === true"));
+    check('bouton Ready masqué au chargement', await evalJs(host, "document.querySelector('#p2p-ready').hidden === true"));
 
-    // (c) remoteSwap — machine à états, board distant (ai).
-    const rs = JSON.parse(await evalJs(cdp, "(function(){ const s = G.createGame({ time: 20, seed: [1,2,3,4] }); G.start(s); const before = JSON.stringify(s.boards.ai); const r = G.remoteSwap(s, 0, 4); return JSON.stringify({ ok: !!(r && r.ok), aiMoves: s.aiMoves, changed: JSON.stringify(s.boards.ai) !== before, self: G.remoteSwap(s, 2, 2).ok === false }); })()"));
+    // (d) Surface G (hôte) : version, G.UI, G.P2P (API + hook _test).
+    const ver = await evalJs(host, 'window.G.version');
+    check('G.version = 2.2.2', ver === '2.2.2', 'v=' + ver);
+    const surf = JSON.parse(await evalJs(host, "JSON.stringify({ u: typeof G.UI.start2PGame, a: typeof G.UI.applyRemoteMove, p: typeof G.P2P.host, j: typeof G.P2P.join, s: typeof G.P2P.genSeed, v: typeof G.P2P.validateInit, d: typeof G.P2P.buildInit, c: typeof G.P2P.validateMove, l: typeof G.P2P.onLocalHumanMove, t: typeof G.P2P._test.onMessage, rs: typeof G.remoteSwap, hs: typeof G.humanSwap })"));
+    check('G.UI.start2PGame/applyRemoteMove + G.P2P host/join/genSeed/validateInit/buildInit/validateMove/onLocalHumanMove + hook _test + G.remoteSwap/humanSwap', surf.u === 'function' && surf.a === 'function' && surf.p === 'function' && surf.j === 'function' && surf.s === 'function' && surf.v === 'function' && surf.d === 'function' && surf.c === 'function' && surf.l === 'function' && surf.t === 'function' && surf.rs === 'function' && surf.hs === 'function');
+
+    // (e) Protocole : buildInit/validateInit (type, graine, options hôte) et validateMove.
+    const a = JSON.parse(await evalJs(host, "(() => { const o = G.P2P.buildInit([1,2,3,4], 'normal', 20); return JSON.stringify({ ok: G.P2P.validateInit(o).ok === true, type: o.type === 'init', p: o.p === 'pc2p/v1', v: o.v === 2, seedOk: Array.isArray(o.seed) && o.seed.length === 4, d: o.d === 'normal', t: o.time === 20, boards: o.boards.human.length === 3 && o.boards.human.every((r) => r.length === 5), hashOk: o.boardHash === G.P2P.boardHash(o.boards) }); })()"));
+    check('buildInit valide (type=init, p=pc2p/v1, v=2, graine 128 bits, d=normal, time=20, hash OK)', a.ok && a.type && a.p && a.v && a.seedOk && a.d && a.t && a.boards && a.hashOk, JSON.stringify(a));
+    const b = JSON.parse(await evalJs(host, "(() => { const m = () => G.P2P.buildInit([1,2,3,4], 'normal', 20); const badSeed = m(); delete badSeed.seed; const badSeed2 = m(); badSeed2.seed = 'xy'; const badProto = m(); badProto.p = 'evil'; const badHash = m(); badHash.boardHash = 'zzz'; const badOpts = m(); badOpts.time = 999; return JSON.stringify({ r1: G.P2P.validateInit(badSeed).ok, r2: G.P2P.validateInit(badSeed2).ok, r3: G.P2P.validateInit(badProto).ok, r4: G.P2P.validateInit(badHash).ok, r5: G.P2P.validateInit(badOpts).ok }); })()"));
+    check('validateInit rejette : seed absent, seed invalide, protocole invalide, hash invalide, temps invalide', b.r1 === false && b.r2 === false && b.r3 === false && b.r4 === false && b.r5 === false, JSON.stringify(b));
+    const c = JSON.parse(await evalJs(host, "JSON.stringify({ ok: G.P2P.validateMove({ type: 'move', f: 0, to: 4 }).ok === true, bad: G.P2P.validateMove({ type: 'move', f: 0, to: 0 }).ok === false })"));
+    check('validateMove : 0→4 OK, 0→0 refusé', c.ok && c.bad);
+    const seed = await evalJs(host, 'Array.from(window.G.P2P.genSeed())');
+    check('G.P2P.genSeed : 4 mots int32 (128 bits)', Array.isArray(seed) && seed.length === 4 && seed.every((w) => Number.isInteger(w) && w >= 0 && w <= 0xFFFFFFFF), JSON.stringify(seed));
+
+    // (f) remoteSwap — machine à états, board distant (ai).
+    const rs = JSON.parse(await evalJs(host, "(function(){ const s = G.createGame({ time: 20, seed: [1,2,3,4] }); G.start(s); const before = JSON.stringify(s.boards.ai); const r = G.remoteSwap(s, 0, 4); return JSON.stringify({ ok: !!(r && r.ok), aiMoves: s.aiMoves, changed: JSON.stringify(s.boards.ai) !== before, self: G.remoteSwap(s, 2, 2).ok === false }); })()"));
     check('remoteSwap 0→4 : board ai modifié, aiMoves=1', rs.ok && rs.aiMoves === 1 && rs.changed);
     check('remoteSwap invalide (from==to) refusé, sans effet', rs.self);
 
-    // (d) WebRTC : deux Peer (signalisation PeerJS locale), ICE/SDP, data channel,
-    //     protocole init/move, deal miroir, application du coup distant.
-    const payload = [
-      '(async () => {',
-      '  const SEED = [1, 2, 3, 4];',
-      "  const CFG = { host: '127.0.0.1', port: " + SIG_PORT + ", secure: false };",
-      '  const out = { port: CFG.port };',
-      "  const timeout = (ms) => new Promise((_, rej) => setTimeout(() => rej(new Error('timeout ' + ms + 'ms')), ms));",
-      '  const race = (p, ms) => Promise.race([p, timeout(ms)]);',
-      "  const rndId = () => 'g' + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);",
-      "  const A = new Peer(rndId(), CFG);",
-      "  const B = new Peer(rndId(), CFG);",
-      "  const idP = (P) => new Promise((res, rej) => { P.on('open', res); P.on('error', (e) => rej(new Error('peer err: ' + (e && e.type ? e.type : e)))); });",
-      "  const connAWait = new Promise((res) => { A.on('connection', (c) => res(c)); });",
-      '  try {',
-      '    const idA = await race(idP(A), 10000);',
-      '    const idB = await race(idP(B), 10000);',
-      '    out.ids = [idA, idB];',
-      '    const connB = B.connect(idA, { reliable: true });',
-      '    const connA = await race(connAWait, 10000);',
-      "    const open = (c) => new Promise((res) => { if (c.open) res(); else c.on('open', () => res()); });",
-      '    await race(open(connA), 15000);',
-      '    await race(open(connB), 15000);',
-      '    out.connected = connA.open === true && connB.open === true;',
-      '    if (!out.connected) { A.destroy(); B.destroy(); return JSON.stringify(out); }',
-      "    const initMsg = JSON.stringify({ v: 1, seed: SEED, d: 'normal', t: 20 });",
-      "    connA.send(initMsg);",
-      "    const initB = await race(new Promise((res) => connB.on('data', (d) => res(String(d)))), 8000);",
-      '    const initObj = JSON.parse(initB);',
-      '    out.initSeedOk = Array.isArray(initObj.seed) && initObj.seed.length === 4;',
-      '    const gA = G.createGame({ time: 20, seed: initObj.seed });',
-      '    const gB = G.createGame({ time: 20, seed: initObj.seed });',
-      '    out.mirrorA = JSON.stringify(gA.boards.human) === JSON.stringify(gA.boards.ai);',
-      '    out.mirrorB = JSON.stringify(gB.boards.human) === JSON.stringify(gB.boards.ai);',
-      '    out.sameDeal = JSON.stringify(gA.boards.human) === JSON.stringify(gB.boards.human);',
-      '    G.start(gA); G.start(gB);',
-      '    const bBefore = JSON.stringify(gB.boards.human);',
-      '    const bRes = G.humanSwap(gB, 0, 4);',
-      "    out.bMoved = (bRes && bRes.ok === true) && JSON.stringify(gB.boards.human) !== bBefore;",
-      "    const moveMsg = JSON.stringify({ f: 0, t: 4 });",
-      "    connB.send(moveMsg);",
-      "    const moveA = await race(new Promise((res) => connA.on('data', (d) => res(String(d)))), 8000);",
-      '    const mv = JSON.parse(moveA);',
-      '    out.moveRecv = mv.f === 0 && mv.t === 4;',
-      '    const aBefore = JSON.stringify(gA.boards.ai);',
-      '    const aRes = G.remoteSwap(gA, mv.f, mv.t);',
-      '    out.aMoved = (aRes && aRes.ok === true) && gA.aiMoves === 1 && JSON.stringify(gA.boards.ai) !== aBefore;',
-      '    out.mirrorAfter = JSON.stringify(gA.boards.ai) === JSON.stringify(gB.boards.human);',
-      '    A.destroy(); B.destroy();',
-      '  } catch (e) {',
-      '    out.error = String(e && e.message ? e.message : e);',
-      '    try { A.destroy(); } catch (_) {}',
-      '    try { B.destroy(); } catch (_) {}',
-      '  }',
-      '  return JSON.stringify(out);',
-      '})()',
-    ].join('\n');
-    const rt = JSON.parse(await evalJs(cdp, payload));
-    check('WebRTC : deux Peer connectés (ICE/SDP, data channel)', rt.connected === true, rt.error || '');
-    check('init : graine 128 bits reçue du host', rt.initSeedOk === true);
-    check('deal miroir : human == ai des deux cotes', rt.mirrorA === true && rt.mirrorB === true);
-    check('deal miroir : plateau identique des deux cotes', rt.sameDeal === true);
-    check('move : guest 0→4 appliqué sur son board humain', rt.bMoved === true);
-    check('move : reçu par le host (f/t valides)', rt.moveRecv === true);
-    check('move : remoteSwap du host sur son board ai (aiMoves=1)', rt.aMoved === true);
-    check('invariant post-move : board ai(host) == board humain(guest)', rt.mirrorAfter === true);
+    // (g) Chemin réel 2 joueurs : hôte (onglet A) -> visiteur (onglet B).
+    // (g1) Observateurs du statut #p2p-status (historique texte) des deux côtés.
+    const obsH = await evalJs(host, OBSERVER);
+    const obsG = await evalJs(guest, OBSERVER);
+    check('observateurs statut installés (hôte + visiteur)', obsH === 'observer' && obsG === 'observer');
+    // Langue déterministe (EN) pour les assertions de texte.
+    await evalJs(host, "G.I18N.setLang('en'); 'ok'");
+    await evalJs(guest, "G.I18N.setLang('en'); 'ok'");
+
+    // (g2) Garde : countdown invalide (sans rôle / n non entier) -> aucun effet.
+    const guard = JSON.parse(await evalJs(host, "(() => { const st = document.querySelector('#p2p-status'); const before = st ? st.textContent : null; G.P2P._test.onMessage({ type: 'countdown', n: 99 }); G.P2P._test.onMessage({ type: 'countdown', n: 'x' }); const after = st ? st.textContent : null; return JSON.stringify({ unchanged: before === after }); })()"));
+    check('countdown invalide (sans rôle / n non entier) : statut inchangé', guard.unchanged === true);
+
+    // (g3) Hôte : options (normal, 20 s) + ouverture du canal (salle G16R2) ; visiteur : join.
+    await evalJs(host, "(() => { document.querySelector('#diff').value = 'normal'; document.querySelector('#time').value = '20'; G.P2P.host('G16R2', 'normal', 20); return 'host'; })()");
+    await evalJs(guest, "G.P2P.join('G16R2')");
+
+    // (g4) Bouton « Ready ? » visible des deux côtés (canal ouvert).
+    await waitFor(host, "!document.querySelector('#p2p-ready').hidden", 20000, 'bouton Ready visible (hôte)');
+    await waitFor(guest, "!document.querySelector('#p2p-ready').hidden", 20000, 'bouton Ready visible (visiteur)');
+    check('bouton Ready visible côté hôte ET visiteur', true);
+
+    // (g5) Les deux joueurs cliquent « Ready ? » (handshake bidirectionnel).
+    await evalJs(host, "document.querySelector('#p2p-ready').click()");
+    await evalJs(guest, "document.querySelector('#p2p-ready').click()");
+    check('clicks Ready effectués des deux côtés', true);
+
+    // (g6) Deal : l'hôte compte 3-2-1 puis envoie l'init ; les deux parties démarrent.
+    await waitFor(host, "window.G.UI.stateInfo() && window.G.UI.stateInfo().running === true", 25000, 'départ hôte');
+    await waitFor(guest, "window.G.UI.stateInfo() && window.G.UI.stateInfo().running === true", 25000, 'départ visiteur');
+    check('départ effectif des deux côtés (game running)', true);
+    const siH = JSON.parse(await evalJs(host, 'JSON.stringify(G.UI.stateInfo())'));
+    const siG = JSON.parse(await evalJs(guest, 'JSON.stringify(G.UI.stateInfo())'));
+    check('options hôte propagées (difficulty=normal des deux côtés)', siH.difficulty === 'normal' && siG.difficulty === 'normal', 'h=' + siH.difficulty + ' g=' + siG.difficulty);
+
+    // (g7) Miroir du deal : mêmes 15 cartes, human==ai, hôte==visiteur.
+    const bh = JSON.parse(await evalJs(host, 'JSON.stringify(G.UI.boards())'));
+    const bg = JSON.parse(await evalJs(guest, 'JSON.stringify(G.UI.boards())'));
+    const j = (x) => JSON.stringify(x);
+    check('deal miroir : human == ai (hôte)', j(bh.human) === j(bh.ai));
+    check('deal miroir : human == ai (visiteur)', j(bg.human) === j(bg.ai));
+    check('deal identique hôte == visiteur', j(bh.human) === j(bg.human));
+
+    // (g8) Compte à rebours SYNCHRONISÉ : les ticks de l'hôte vus par le visiteur.
+    const sh = await evalJs(host, 'window.__g16.status');
+    const sg = await evalJs(guest, 'window.__g16.status');
+    const cdOf = (arr) => (arr || []).filter((t) => typeof t === 'string' && /Dealing in [123]/.test(t));
+    const cdH = cdOf(sh);
+    const cdG = cdOf(sg);
+    check('hôte : compte à rebours 3-2-1 affiché (ticks >= 2)', cdH.length >= 2, 'seq=' + JSON.stringify(sh));
+    check('visiteur : compte à rebours synchronisé reçu (ticks >= 2)', cdG.length >= 2, 'seq=' + JSON.stringify(sg));
+    const nums = (arr) => arr.map((t) => Number(t.match(/Dealing in ([123])/)[1]));
+    const dec = (arr) => { const n = nums(arr); return n.length >= 2 && n[0] === 3 && n[n.length - 1] === 1 && n.every((v, i) => i === 0 || n[i - 1] > v); };
+    check('visiteur : ticks strictement décroissants 3 -> 1', dec(cdG), JSON.stringify(nums(cdG)));
+
+    // (g9) Coup humain du VISITEUR via l'UI (Pointer Events) -> onLocalHumanMove.
+    const guestSwap = await evalJs(guest, GUEST_SWAP);
+    check('visiteur : swap UI réussi (Pointer Events), humanMoves >= 1', guestSwap === true);
+
+    // (g10) Hôte : coup distant reçu + remoteSwap appliqué sur son board ai.
+    const hostAiMoves = await evalJs(host, "new Promise((res) => { const t0 = Date.now(); const iv = setInterval(() => { const m = window.G.UI.aiMoves(); if (m >= 1) { clearInterval(iv); res(m); } else if (Date.now() - t0 > 8000) { clearInterval(iv); res(m || 0); } }, 100); })");
+    check('hôte : coup distant reçu et appliqué (aiMoves=1)', hostAiMoves === 1);
+
+    // (g11) Invariants post-move + statut final.
+    const bh2 = JSON.parse(await evalJs(host, 'JSON.stringify(G.UI.boards())'));
+    const bg2 = JSON.parse(await evalJs(guest, 'JSON.stringify(G.UI.boards())'));
+    check('invariant post-move : board ai(hôte) == board humain(visiteur)', j(bh2.ai) === j(bg2.human));
+    check('invariant post-move : board humain(hôte) == board ai(visiteur)', j(bh2.human) === j(bg2.ai));
+    const stH = await evalJs(host, "document.querySelector('#p2p-status').textContent");
+    const stG = await evalJs(guest, "document.querySelector('#p2p-status').textContent");
+    check('statut final : « Connected » des deux côtés', /Connected/.test(stH) && /Connected/.test(stG), 'hôte=' + stH + ' visiteur=' + stG);
   } finally {
-    try { if (cdp) cdp.close(); } catch {}
+    try { if (guest) guest.close(); } catch {}
+    try { if (host) host.close(); } catch {}
     try { sig.kill('SIGKILL'); } catch {}
   }
   lines.push('FAILURES: ' + failures);
@@ -178,4 +233,5 @@ async function main() {
   console.log(lines.join('\n'));
   process.exit(failures === 0 ? 0 : 1);
 }
+
 main().catch((e) => { console.error('ERREUR:', e.message); process.exit(1); });

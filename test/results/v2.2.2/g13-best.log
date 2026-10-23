@@ -1,0 +1,9 @@
+Chrome CDP prêt sur 127.0.0.1:9449 pour g13-best.mjs
+[ OK ] partie 1 : final atteint, score humain défini — {"best":"New best score: 22 pts","stored":"22","human":22}
+[ OK ] best « abc » ne bloque pas : record écrit — stored=22 human=22
+[ OK ] affichage « Nouveau meilleur score » — New best score: 22 pts
+[ OK ] best « 999999 » conservé (pas de faux record) — stored=999999 human=37
+[ OK ] affichage du meilleur existant (pas « nouveau ») — Best score: 999999 pts
+[ OK ] best « -5 » → 0 : record écrit — stored=14 human=14
+FAILURES: 0
+RESULT: OK

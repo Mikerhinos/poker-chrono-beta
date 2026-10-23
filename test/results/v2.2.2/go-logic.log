@@ -1,0 +1,19 @@
+  ok  contrat : GO_MIN_MS = 5000
+  ok  contrat : cap bonus = 16
+  ok  contrat : 90 s dans TIME_OPTIONS
+  ok  GO à t = 4,999 s : refusé (too_early)
+  ok  GO trop tôt : la partie continue
+  ok  GO à t = 5,010 s : accepté
+  ok  bonus = 16 (84,99 s restantes → 85 pts bruts, cap 16)
+  ok  total = plateau + bonus
+  ok  winner recalculé avec bonus
+  ok  état terminé après GO
+  ok  2e clic : idempotent (1 seul bonus)
+  ok  GO à t = 85 s : bonus 5 pts
+  ok  fin naturelle atteinte
+  ok  fin naturelle : bonus 0, total = plateau
+  ok  GO après fin : refusé (over)
+  ok  GO sans partie : refusé (no_state)
+  ok  2P (aiFrozen) : 0 swap IA
+  ok  2P : chrono joué jusqu’à 0
+go-logic : 18 ok, 0 fail
