@@ -1,4 +1,4 @@
-// PORTE 16 — P2P 2 joueurs : VRAI chemin hôte→visiteur (v2.2.2).
+// PORTE 16 — P2P 2 joueurs : VRAI chemin hôte→visiteur (v2.2.3).
 // Preuve de bout en bout, dans le navigateur (CDP, Chrome headless, DEUX onglets) :
 //   - signalisation PeerJS locale (peerjs-server sur 127.0.0.1:9000, /peerjs) ;
 //   - tab A = page HÔTE, tab B = page VISITEUR (vraie session WebRTC inter-onglets) ;
@@ -57,7 +57,7 @@ async function waitFor(cdp, expr, timeoutMs, name) {
   }
 }
 
-const READY_EXPR = "!!(window.G && window.G.version === '2.2.2' && window.G.UI && window.Peer && window.G.P2P && window.G.P2P._test)";
+const READY_EXPR = "!!(window.G && window.G.version === '2.2.3' && window.G.UI && window.Peer && window.G.P2P && window.G.P2P._test)";
 const OBSERVER = `(() => {
   window.__g16 = { status: [], last: '' };
   const st = document.querySelector('#p2p-status');
@@ -132,7 +132,7 @@ async function main() {
 
     // (d) Surface G (hôte) : version, G.UI, G.P2P (API + hook _test).
     const ver = await evalJs(host, 'window.G.version');
-    check('G.version = 2.2.2', ver === '2.2.2', 'v=' + ver);
+    check('G.version = 2.2.3', ver === '2.2.3', 'v=' + ver);
     const surf = JSON.parse(await evalJs(host, "JSON.stringify({ u: typeof G.UI.start2PGame, a: typeof G.UI.applyRemoteMove, p: typeof G.P2P.host, j: typeof G.P2P.join, s: typeof G.P2P.genSeed, v: typeof G.P2P.validateInit, d: typeof G.P2P.buildInit, c: typeof G.P2P.validateMove, l: typeof G.P2P.onLocalHumanMove, t: typeof G.P2P._test.onMessage, rs: typeof G.remoteSwap, hs: typeof G.humanSwap })"));
     check('G.UI.start2PGame/applyRemoteMove + G.P2P host/join/genSeed/validateInit/buildInit/validateMove/onLocalHumanMove + hook _test + G.remoteSwap/humanSwap', surf.u === 'function' && surf.a === 'function' && surf.p === 'function' && surf.j === 'function' && surf.s === 'function' && surf.v === 'function' && surf.d === 'function' && surf.c === 'function' && surf.l === 'function' && surf.t === 'function' && surf.rs === 'function' && surf.hs === 'function');
 
@@ -172,6 +172,16 @@ async function main() {
     await waitFor(host, "!document.querySelector('#p2p-ready').hidden", 20000, 'bouton Ready visible (hôte)');
     await waitFor(guest, "!document.querySelector('#p2p-ready').hidden", 20000, 'bouton Ready visible (visiteur)');
     check('bouton Ready visible côté hôte ET visiteur', true);
+    // (g4b) v2.2.3 B1 : garde Play/Rejouer avant 2×Ready — en session 2P,
+    // #start (Play) et #replay (Rejouer) sont inactifs tant que les deux
+    // joueurs ne sont pas ready.
+    const guardB1a = JSON.parse(await evalJs(host, 'JSON.stringify({ s: document.querySelector("#start").disabled, r: document.querySelector("#replay").disabled })'));
+    const guardB1b = JSON.parse(await evalJs(guest, 'JSON.stringify({ s: document.querySelector("#start").disabled, r: document.querySelector("#replay").disabled })'));
+    check('B1 Play + Rejouer inactifs avant 2×Ready (hôte ET visiteur)', guardB1a.s === true && guardB1a.r === true && guardB1b.s === true && guardB1b.r === true, JSON.stringify([guardB1a, guardB1b]));
+    await evalJs(host, "document.querySelector('#p2p-ready').click()");
+    await sleep(500);
+    const guardB1c = JSON.parse(await evalJs(host, 'JSON.stringify({ s: document.querySelector("#start").disabled, r: document.querySelector("#replay").disabled })'));
+    check('B1 Play + Rejouer inactifs après 1×Ready seul (hôte)', guardB1c.s === true && guardB1c.r === true, JSON.stringify(guardB1c));
 
     // (g5) Les deux joueurs cliquent « Ready ? » (handshake bidirectionnel).
     await evalJs(host, "document.querySelector('#p2p-ready').click()");
@@ -182,6 +192,10 @@ async function main() {
     await waitFor(host, "window.G.UI.stateInfo() && window.G.UI.stateInfo().running === true", 25000, 'départ hôte');
     await waitFor(guest, "window.G.UI.stateInfo() && window.G.UI.stateInfo().running === true", 25000, 'départ visiteur');
     check('départ effectif des deux côtés (game running)', true);
+    // (g6b) v2.2.3 B1 : pendant la partie 2P, Play reste inactif et Rejouer
+    // aussi (la partie est en cours — Rejouer se ré-arme à la fin, g12).
+    const guardB1d = JSON.parse(await evalJs(host, 'JSON.stringify({ s: document.querySelector("#start").disabled, r: document.querySelector("#replay").disabled })'));
+    check('B1 Play + Rejouer inactifs pendant la partie 2P (hôte)', guardB1d.s === true && guardB1d.r === true, JSON.stringify(guardB1d));
     const siH = JSON.parse(await evalJs(host, 'JSON.stringify(G.UI.stateInfo())'));
     const siG = JSON.parse(await evalJs(guest, 'JSON.stringify(G.UI.stateInfo())'));
     check('options hôte propagées (difficulty=normal des deux côtés)', siH.difficulty === 'normal' && siG.difficulty === 'normal', 'h=' + siH.difficulty + ' g=' + siG.difficulty);
@@ -222,6 +236,50 @@ async function main() {
     const stH = await evalJs(host, "document.querySelector('#p2p-status').textContent");
     const stG = await evalJs(guest, "document.querySelector('#p2p-status').textContent");
     check('statut final : « Connected » des deux côtés', /Connected/.test(stH) && /Connected/.test(stG), 'hôte=' + stH + ' visiteur=' + stG);
+
+    // (g12) v2.2.3 B1 : fin de partie 2P — Play reste inactif (session 2P),
+    // Rejouer se ré-arme ; écran final affiché.
+    await waitFor(host, 'window.G.UI.stateInfo() && window.G.UI.stateInfo().ended === true', 30000, 'fin hôte');
+    await waitFor(guest, 'window.G.UI.stateInfo() && window.G.UI.stateInfo().ended === true', 30000, 'fin visiteur');
+    check('fin de partie 2P (over des 2 côtés, time=20 s)', true);
+    const finalH = JSON.parse(await evalJs(host, 'JSON.stringify({ f: !document.querySelector("#final").hidden, s: document.querySelector("#start").disabled, r: !document.querySelector("#replay").disabled })'));
+    check('B1 fin 2P : écran final affiché, Play inactif, Rejouer ré-armé (hôte)', finalH.f === true && finalH.s === true && finalH.r === true, JSON.stringify(finalH));
+
+    // (g13) v2.2.3 B2 : « Rejouer » en 2P = PROPOSITION (jamais de partie IA).
+    const boardsBefore = JSON.parse(await evalJs(guest, 'JSON.stringify(G.UI.boards())'));
+    await evalJs(guest, "document.querySelector('#replay').click()");
+    await sleep(800);
+    const boardsAfter = JSON.parse(await evalJs(guest, 'JSON.stringify(G.UI.boards())'));
+    const postG = JSON.parse(await evalJs(guest, 'JSON.stringify({ e: G.UI.stateInfo().ended, rn: G.UI.stateInfo().running, two: !!window.G.twoPlayerMode })'));
+    check('B2 Rejouer 2P (visiteur) : pas de partie IA — fin maintenue, plateaux gelés, mode 2P conservé', postG.e === true && postG.rn === false && postG.two === true && JSON.stringify(boardsAfter) === JSON.stringify(boardsBefore), JSON.stringify(postG));
+    const postH = JSON.parse(await evalJs(host, 'JSON.stringify({ e: G.UI.stateInfo().ended, rn: G.UI.stateInfo().running, st: document.querySelector("#p2p-status").textContent, ready: !document.querySelector("#p2p-ready").hidden })'));
+    check('B2 proposition reçue par le hôte : statut « Rematch? », bouton Ready re-ouvert, pas de re-départ', /Rematch/.test(postH.st) && postH.ready === true && postH.e === true && postH.rn === false, JSON.stringify(postH));
+    const hostHS = JSON.parse(await evalJs(host, 'JSON.stringify(G.P2P._test.state())'));
+    check('B2 le hôte n\'auto-accepte pas la proposition (localReady/started/dealing = false)', hostHS.localReady === false && hostHS.started === false && hostHS.dealing === false, JSON.stringify(hostHS));
+
+    // (g14) v2.2.3 B2 : acceptation par le hôte → NOUVELLE PARTIE 2P (pas d'IA).
+    await evalJs(host, "document.querySelector('#p2p-ready').click()");
+    await waitFor(host, 'window.G.UI.stateInfo() && window.G.UI.stateInfo().running === true', 25000, 're-départ hôte');
+    await waitFor(guest, 'window.G.UI.stateInfo() && window.G.UI.stateInfo().running === true', 25000, 're-départ visiteur');
+    check('B2 acceptation hôte → nouvelle partie 2P (running des 2 côtés)', true);
+    const rBh = JSON.parse(await evalJs(host, 'JSON.stringify(G.UI.boards())'));
+    const rBg = JSON.parse(await evalJs(guest, 'JSON.stringify(G.UI.boards())'));
+    const nCards = (x) => x.human.flat().length + x.ai.flat().length;
+    check('B2 rematch : 30 cartes (15/plateau), miroir hôte == visiteur', nCards(rBh) === 30 && j(rBh.human) === j(rBg.human) && j(rBh.ai) === j(rBg.ai), 'cartes=' + nCards(rBh));
+    const siH2 = JSON.parse(await evalJs(host, 'JSON.stringify(G.UI.stateInfo())'));
+    const siG2 = JSON.parse(await evalJs(guest, 'JSON.stringify(G.UI.stateInfo())'));
+    check('B2 options conservées dans le rematch (difficulty=normal des 2 côtés)', siH2.difficulty === 'normal' && siG2.difficulty === 'normal', 'h=' + siH2.difficulty + ' g=' + siG2.difficulty);
+
+    // (g15) v2.2.3 B3 : plateau adverse libellé « Player 2 » (2P), solo inchangé.
+    const tBh = await evalJs(host, 'document.querySelector("#board-ai h2").textContent');
+    const tBg = await evalJs(guest, 'document.querySelector("#board-ai h2").textContent');
+    check('B3 plateau adverse = « Player 2 » des 2 côtés (EN)', tBh === 'Player 2' && tBg === 'Player 2', 'h=' + tBh + ' g=' + tBg);
+    const tHh = await evalJs(host, 'document.querySelector("#board-human h2").textContent');
+    check('B3 plateau humain inchangé = « Your board » (EN)', tHh === 'Your board', 'h=' + tHh);
+    await evalJs(host, "G.I18N.setLang('fr')");
+    const tFr = await evalJs(host, 'document.querySelector("#board-ai h2").textContent');
+    check('B3 « Player 2 » traduit : FR = « Joueur 2 » après setLang', tFr === 'Joueur 2', 'h=' + tFr);
+    await evalJs(host, "G.I18N.setLang('en')");
   } finally {
     try { if (guest) guest.close(); } catch {}
     try { if (host) host.close(); } catch {}

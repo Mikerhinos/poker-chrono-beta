@@ -830,3 +830,43 @@ Logs intégraux : `test/results/v2.1.2-q/`.
 3. Résidu « 2.2.1 » : 0 dans `js/`, `index.html`, `css/` ; 4 commentaires d'en-tête documentaires dans `test/` (g8-scan L1, g15-i18n L1, g9-boards L35, g14-innertest L2) — références historiques, non fonctionnelles.
 4. Erreur intermittente « stdin is not a tty » sur certains `node -e`/lancements sans redirection → contournée par `< /dev/null` (documenté ANCRE-PARTS.md). Non bloquante.
 5. Tentatives : AT-V22C-#1 (142 tool calls, aucun livrable, arrêt mid-task — cause inconnue) ; AT-V22C-#2 (stoppée par l'opérateur à 101 % de contexte après 400+ min, 3 fichiers modifiés laissés sur disque) ; AT-V22C-#3 (contexte frais : g16 réécrit + passé 2×, suite lancée 12:27, terminée 23/23 RC=0 à 12:39:59, arrêt juste après la fin de la suite) ; reprise **AT-V22C-#3b** (celle-ci) : consolidation des preuves, MANIFESTE, COMPTE-RENDU, commit.
+
+## PATCH v2.2.3 — Flow 2P : B1 gate Play 2×Ready + B2 Rejouer = proposition + B3 libellé « Player 2 » (2026-10-24, TASK-V223-BUGS-2P-20261024-01)
+
+**Demande utilisateur (verbatim)** : « les boutons "play" doivent être inactifs tant que tout le monde n'a pas cliqué "ready". Ensuite en fin de partie, pareil si un joueur clique "rejouer" ça devrait demander à l'autre joueur s'il veut rejouer car là ça lance une nouvelle partie contre IA. D'ailleurs en mode 1 vs 1 il faut que le second joueur soit identifié comme "Player 2"… »
+
+**Corrections** :
+1. `js/ui.js` — B1 : les boutons `#start` (Play) et `#replay` (Rejouer) restent `disabled` en mode 2P tant que les 2 joueurs ne sont pas Ready ; ré-activation après le deal (partie lancée) et à la fin de partie (cohérent avec l'état `ended`).
+2. `js/net.js` — B2 : nouveau type de message `rematch` du protocole pc2p (`proposeRematch()` côté hôte + traitement dans `onMessage` côté visiteur). Le bouton « Rejouer » en 2P envoie la proposition ; la nouvelle partie ne démarre que si l'adversaire accepte, en réutilisant la mécanique Ready/`maybeDeal` existante (aucun chemin parallèle). Jamais de `startGame()` solo/IA depuis l'écran de fin 2P. Le Rejouer solo reste inchangé.
+3. `js/net.js` — racine du timeout g16 (premier run) : `started` restait `true` après la fin de partie → `proposeRematch` refusait la rematch → garde corrigée `started && !ended` (fin de partie détectée via `G.UI.stateInfo().ended`).
+4. `js/i18n.js` — B3 : 2 nouvelles clés × 5 langues (EN/FR/ES/IT/DE) : `p2p_player2` (« Player 2 » / « Joueur 2 » / « Jugador 2 » / « Giocatore 2 » / « Spieler 2 ») et `p2p_rematch_ask` ; `apply()` appelle désormais `G.UI.updateBoardTitles()` (libellé dynamique au changement de langue).
+5. `js/ui.js` — B3 : le plateau du 2e joueur 2P est étiqueté `p2p_player2` quand `twoPlayer === true` (le libellé solo `ai_board` reste intact).
+6. `js/game.js` — `G.version` → `2.2.3` (seule occurrence de version déclarée — convention v2.2.2).
+7. `index.html` et `package.json` — **inchangés** : aucun pin version dans index.html (le libellé dynamique B3 est fait entièrement dans `js/ui.js` + `js/i18n.js` — vérifié par le check g16 B3 « plateau adverse = « Player 2 » des 2 côtés ») ; package.json reste 2.2.0 (convention v2.2.2, hors périmètre des versions v2.2.x).
+9. `all.js` — régénérée par script (recette byte-exacte : 7 modules dans l'ordre des `<script>` d'index.html, trailing newlines de chaque module conservés, `join('\n')`, sans `peerjs.min.js`) — 101 612 o, 0 CR.
+10. Pins version 2.2.3 : 11 tests (`g4-colors`, `g5-rownames`, `g5-ui`, `g6-audio`, `g7-fx`, `g9-boards`, `g11-noscore`, `g12-seed`, `g13-best`, `g14-innertest`, `poc-repro`).
+11. `test/g16-p2p.mjs` — 31 checks baseline + **14 nouveaux checks B1/B2/B3** = **45 checks** (B1 Play disabled avant 2×Ready + ré-enable ; B2 proposition → refus (pas de partie) / acceptation (nouvelle partie 2P, 30 cartes, options conservées) ; B3 libellé « Player 2 » des 2 côtés + traduction FR « Joueur 2 » + plateau humain inchangé).
+
+**Tests exécutés** (2026-10-24) :
+- `node test/run-headless.mjs g16-p2p.mjs 9347 < /dev/null` → **RC=0, 45 checks OK, FAILURES 0**. Extrait : « B1 Play disabled avant 2×Ready », « B2 acceptation hôte → nouvelle partie 2P (running des 2 côtés) », « B2 rematch : 30 cartes (15/plateau), miroir hôte == visiteur », « B3 plateau adverse = « Player 2 » des 2 côtés (EN) ».
+- Suite 23 portes — **2 runs** :
+  - Run 1 (15:53:05–16:01:01) : **22/23 RC=0** — PORTE 04 (`g14-innertest`) RC=1 : le pin-bump 2.2.2→2.2.3 avait remplacé le *libellé* de la check mais pas la *regex* `/version: '2\.2\.2'/` (points échappés, non touchés par le remplacement simple) → la check testait `'2.2.2'` alors que `js/game.js` portait `'2.2.3'`.
+  - Correction : `test/g14-innertest.mjs` L27 → `/version: '2\.2\.3'/` ; porte 04 seule RC=0 (0 s).
+  - **Run 2 (16:01–16:19:05) : 23/23 RC=0** — `test/results/v2.2.3/suite-run-v223.txt`.
+- ESLint porte 23 : **RC=0, 0 erreur / 0 warning** (sortie vide, `all.js` 101 612 o).
+- i18n porte 15 : **FAILURES 0** (parité 5 langues conservée avec les 10 nouvelles clés).
+- Bench 900 : sha256 normalisé (retrait ligne « total » + 4 warnings Node, JSON field "wall" → "111.5") = `312841cd81911460d998d4b4d6a026cfab11b4c7efca4559a8443bc828bc357a` — **identique à la référence v2.1.2 / v2.2 / v2.2.1 / v2.2.2**. La recette a été re-vérifiée sur le fichier baseline v2.2.2 (reproduction exacte du hash) avant application au run v2.2.3.
+- `test/g2g4-result.txt` byte-identique avant/après (logique du jeu inchangée — détection déterministe de la fin de partie non modifiée).
+
+**Anomalies (non bloquantes, documentées)** :
+- PORTE 8 (`g8-scan`) : 26 OK, 1 FAIL — « taille totale (index.html + css/ + js/) entre 100 et 256 Ko » : **268 533 octets** (262 752 en v2.2.2, +5 781 o : protocole rematch, 10 clés i18n, gate B1, libellés B3). RC=0 conservé (FAIL interne à la porte, même comportement que v2.2.2). Augmenter le plafond 256 Ko = décision hors périmètre.
+- Check board-size B2 : assertion initiale 36 cartes (18/plateau) vs réel 30 (3×5 = 15/plateau × 2 plateaux) → assertion corrigée à 30 (« 15/plateau »).
+- `write_file` n'a pas été utilisé pour MANIFESTE.md (incident INC-12) : régénération par script Python binaire (LF, 0 CR).
+
+**Tentatives substantielles (échecs inclus)** :
+1. Patch g16 essai 1 : syntax error Python → rewrite de l'accumulateur de checks (essai 2 OK, 45 checks).
+2. Régénération all.js v1 : trailing newlines supprimés (divergence 6 bytes vs recette HEAD) → byte-compare contre `git show HEAD:all.js` → recette exacte : trailing newlines conservés, `join('\n')`, 101 612 o.
+3. g16 run 1 : timeout (rematch rejetée — racine §Corrections.3) → 44/45 (board 36/30) → correction de l'assertion → **45/45**.
+4. Suite run 1 : PORTE 04 RC=1 (regex pin g14 non bumpée) → correction → run 2 **23/23**.
+5. Normalisation bench essai 1 : regex « total » sans espaces de tête + guillemets perdus sur « 111.5 » → hash 8fd07a86… ≠ référence → recette re-vérifiée sur le baseline (exact) → rerun → match 312841cd…
+6. STATE-CARD : 2 patch échoués (« Could not find a match » — modification concurrente NI4NI) → écriture atomique Python (read-modify-write + os.replace) — 3 itérations.

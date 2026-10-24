@@ -1,0 +1,654 @@
+===================================================================
+SUITE POKER-CHRONO v2.2.3 — demarrage 2026-10-24 16:11:17
+23 commandes (22 node + 1 ESLint) — Node v26.7.0 — headless Chrome (run-headless.mjs)
+CDP : gates 9441-9452, g16 9347 — broker g16 : 127.0.0.1:9000 (spawn interne)
+stdin redirige de /dev/null (contournement non-TTY, cf. ANCRE-PARTS.md)
+===================================================================
+===================================================================
+=== PORTE 01/23 g1-scores
+=== CMD: node test/g1-scores.js
+(node:18284) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/Mikerhinos/.openmausbot/workspaces/8b7108b4-e038-49f5-90ef-53f03bd46b30/poker-chrono/test/g1-scores.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to \\?\C:\Users\Mikerhinos\.openmausbot\workspaces\8b7108b4-e038-49f5-90ef-53f03bd46b30\poker-chrono\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok   quinte flush 7-8-9-10-V pique — → quinte_flush (500)
+  ok   quatre d’as — → quatre (300)
+  ok   full RRRDD — → full (150)
+  ok   couleur sans quinte — → couleur (100)
+  ok   quinte (sans couleur) — → quinte (75)
+  ok   quinte 10-J-Q-D-A (A haute) — → quinte (75)
+  ok   brelan — → brelan (40)
+  ok   double paire — → double_paire (25)
+  ok   paire — → paire (10)
+  ok   carte haute — → carte_haute (2)
+  ok   quinte 2-3-4-5-6 (échelle basse) — → quinte (75)
+  ok   quinte 6-7-8-9-10 (échelle basse 2) — → quinte (75)
+  ok   quinte wheel A-2-3-4-5 — → quinte (75)
+  ok   quinte flush 2-3-4-5-6 pique — → quinte_flush (500)
+  ok   couleur avec basses 2-5-6-8-K cœur — → couleur (100)
+  ok   brelan 2-2-2-3-R — → brelan (40)
+  ok   double paire 2-2-3-3-K — → double_paire (25)
+  ok   paire 2-2 + kickers 5-8-K — → paire (10)
+  ok   carte haute 2-4-6-8-K — → carte_haute (2)
+  ok   pas de quinte enroulée (A-7-8-9-10) — → carte_haute (2)
+  ok   A-2-3-5-6 n’est pas une quinte (pas de wheel, pas consécutif) — → carte_haute (2)
+  ok   quatre (300) > full (150)
+  ok   ordre complet du barème
+  ok   éval de 4 cartes → erreur
+  ok   carte invalide (r=15) → erreur
+  ok   carte invalide (s=5) → erreur
+  ok   carte invalide (r=1) → erreur
+  ok   cartes basses v2.1 valides (r=2..6)
+  ok   boardScore = 500+300+2 = 802 — → 802
+  ok   boardBreakdown 3 lignes étiquetées
+  ok   source rowScore identique poker-chrono ↔ poker-rush
+  ok   source boardScore identique poker-chrono ↔ poker-rush
+  ok   source boardBreakdown identique poker-chrono ↔ poker-rush
+  ok   source isFull identique poker-chrono ↔ poker-rush
+  ok   const SUIT_LABEL identique poker-chrono ↔ poker-rush
+  ok   const SUIT_NAME identique poker-chrono ↔ poker-rush
+  ok   const HAND_SCORES identique poker-chrono ↔ poker-rush
+  ok   const HAND_LABEL identique poker-chrono ↔ poker-rush
+  ok   RANKS v2.1 : 13 rangs 2→A
+  ok   RANK_LABEL couvre 2-6
+  ok   isValidCard v2.1 : r=2 OK, r=1/r=15 refusés
+
+[PORTE 1] 41 OK, 0 FAIL
+[PORTE 1] PORTE PASSÉE
+=== RC: 0 (0 s)
+=== EOF PORTE 01/23 g1-scores (RC=0) ===
+===================================================================
+=== PORTE 02/23 g3-swap
+=== CMD: node test/g3-swap.js
+(node:13200) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/Mikerhinos/.openmausbot/workspaces/8b7108b4-e038-49f5-90ef-53f03bd46b30/poker-chrono/test/g3-swap.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to \\?\C:\Users\Mikerhinos\.openmausbot\workspaces\8b7108b4-e038-49f5-90ef-53f03bd46b30\poker-chrono\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok   miroir : 52 cartes, 15 + 15 + 37, toutes uniques
+  ok   miroir : main joueur == main IA (même sélection)
+  ok   miroir : aucune carte dupliquée dans les mains
+  ok   même seed → mêmes 15 cartes (joueur)
+  ok   même seed → mêmes 15 cartes (IA, miroir)
+  ok   aucune duplication dans le deal (67 cartes listées, 52 uniques : miroir)
+  ok   swap valide accepté — {"ok":true}
+  ok   swap valide : cellules 0 et 1 échangées
+  ok   swap valide : le reste du plateau inchangé
+  ok   swap valide : humanMoves incrémenté
+  ok   case identique : refus "self"
+  ok   case identique : plateau inchangé
+  ok   hors plateau : refus "out"
+  ok   hors plateau : plateau inchangé
+  ok   dépôts invalides (6 formes) → refus "invalid"
+  ok   dépôt undefined → refus "out" — {"ok":false,"reason":"out"}
+  ok   dépôts invalides : plateau inchangé
+  ok   non lancée : refus "not_running"
+  ok   tick jusqu’à terme
+  ok   terminée : refus "over"
+  ok   terminée : plateau inchangé
+  ok   simulation : 67 cartes listées, 52 uniques (miroir)
+  ok   simulation : plateaux toujours pleins (15+15)
+  ok   simulation : résultat cohérent (total = somme des lignes)
+
+[PORTE 3] 24 OK, 0 FAIL
+[PORTE 3] PORTE PASSÉE
+=== RC: 0 (0 s)
+=== EOF PORTE 02/23 g3-swap (RC=0) ===
+===================================================================
+=== PORTE 03/23 g8-scan
+=== CMD: node test/g8-scan.mjs
+  ok   vendeur (peerjs.min.js) exclu du scan URL, compté dans la taille
+  ok   zéro occurrence : URL http(s)://
+  ok   zéro occurrence : protocole // (protocol-relative)
+  ok   zéro occurrence : <img
+  ok   zéro occurrence : <iframe|<object|<embed|<video|<audio|<source
+  ok   zéro occurrence : @import
+  ok   zéro occurrence : url() non data:
+  ok   zéro occurrence : fetch(/XMLHttpRequest/WebSocket
+  ok   zéro occurrence : import/export externe (module URL)
+  ok   <script src="js/deck.js" référence locale — js/deck.js
+  ok   <script src="js/game.js" référence locale — js/game.js
+  ok   <script src="js/i18n.js" référence locale — js/i18n.js
+  ok   <script src="js/audio.js" référence locale — js/audio.js
+  ok   <script src="js/fx.js" référence locale — js/fx.js
+  ok   <script src="js/ui.js" référence locale — js/ui.js
+  ok   <script src="js/peerjs.min.js" référence locale — js/peerjs.min.js
+  ok   <script src="js/net.js" référence locale — js/net.js
+  ok   <link href="css/base.css" référence locale — css/base.css
+  ok   <link href="css/fonts.css" référence locale — css/fonts.css
+  ok   <link href="css/theme.css" référence locale — css/theme.css
+  ok   <link href="css/anim.css" référence locale — css/anim.css
+  ok   8 modules js/ référencés (deck, game, i18n, audio, fx, ui, net, peerjs) — js/deck.js, js/game.js, js/i18n.js, js/audio.js, js/fx.js, js/ui.js, js/peerjs.min.js, js/net.js
+  ok   4 feuilles css/ référencées (base, fonts, theme, anim) — css/base.css, css/fonts.css, css/theme.css, css/anim.css
+  ok   aucun autre attribut src= (non data:/blob:/about:/js/)
+  ok   2 polices embarquées en data:font/woff2;base64 — trouvées : 2
+  ok   aucun chargement de police externe (@font-face + src local) — @font-face : 2
+  FAIL taille totale (index.html + css/ + js/) entre 100 et 256 Ko — 268533 octets
+
+[PORTE 8] 26 OK, 1 FAIL
+[PORTE 8] échecs : taille totale (index.html + css/ + js/) entre 100 et 256 Ko
+[PORTE 8] PORTE ÉCHOUÉE
+=== RC: 0 (0 s)
+=== EOF PORTE 03/23 g8-scan (RC=0) ===
+===================================================================
+=== PORTE 04/23 g14-innertest
+=== CMD: node test/g14-innertest.mjs
+== G14 — Scan statique du rendu dynamique ==
+[ OK ] aucune occurrence innerHTML dans le fichier — count=1
+[ OK ] rendu des lignes via createElement
+[ OK ] labels via textContent
+[ OK ] version 2.2.3
+[ OK ] xoshiro128ss présent (fix H1)
+[ OK ] seed CSPRNG présent (fix H1)
+[ OK ] pas de handle d’état public (fix H2)
+[ OK ] tick dt borné (fix M1)
+[ OK ] best-score validé (fix M2)
+[ OK ] split : aucune référence externe (src/href locaux js/… css/… seuls autorisés, zéro http/https)
+[ OK ] pas de CR (LF)
+FAILURES: 0
+RESULT: OK
+=== RC: 0 (0 s)
+=== EOF PORTE 04/23 g14-innertest (RC=0) ===
+===================================================================
+=== PORTE 05/23 go-logic
+=== CMD: node test/go-logic.mjs
+  ok  contrat : GO_MIN_MS = 5000
+  ok  contrat : cap bonus = 16
+  ok  contrat : 90 s dans TIME_OPTIONS
+  ok  GO à t = 4,999 s : refusé (too_early)
+  ok  GO trop tôt : la partie continue
+  ok  GO à t = 5,010 s : accepté
+  ok  bonus = 16 (84,99 s restantes → 85 pts bruts, cap 16)
+  ok  total = plateau + bonus
+  ok  winner recalculé avec bonus
+  ok  état terminé après GO
+  ok  2e clic : idempotent (1 seul bonus)
+  ok  GO à t = 85 s : bonus 5 pts
+  ok  fin naturelle atteinte
+  ok  fin naturelle : bonus 0, total = plateau
+  ok  GO après fin : refusé (over)
+  ok  GO sans partie : refusé (no_state)
+  ok  2P (aiFrozen) : 0 swap IA
+  ok  2P : chrono joué jusqu’à 0
+go-logic : 18 ok, 0 fail
+=== RC: 0 (1 s)
+=== EOF PORTE 05/23 go-logic (RC=0) ===
+===================================================================
+=== PORTE 06/23 max-board
+=== CMD: node test/max-board.mjs
+  ok   max(HAND_SCORES) = 500 (quinte flush)
+  ok   borne sup plateau = 3 × 500 = 1500
+  ok   plateau : 15 cartes distinctes
+  ok   3 lignes quinte flush (500 chacune)
+  ok   plateau construit : boardScore = 1500 (max théorique atteint)
+  simulation 20000 deals : min=6, P1=6, mediane=22, P99=112, max=504
+  ok   simulation : max observé ≤ 1500 (borne respectée)
+  ok   simulation : tous les plateaux pleins (score > 0)
+
+[[POLE 3]] 7 OK, 0 FAIL
+[[POLE 3]] PORTE PASSÉE
+=== RC: 0 (0 s)
+=== EOF PORTE 06/23 max-board (RC=0) ===
+===================================================================
+=== PORTE 07/23 w3c
+=== CMD: node test/w3c.mjs
+  ok  0 id en double (37 ids au total)
+  ok  0 heading vide (6 headings au parse statique)
+  ok  W3C Nu : 0 erreur (0 info/warning)
+w3c : 3 ok, 0 fail
+=== RC: 0 (0 s)
+=== EOF PORTE 07/23 w3c (RC=0) ===
+===================================================================
+=== PORTE 08/23 g4-colors
+=== CMD: node test/run-headless.mjs g4-colors.mjs 9441
+Chrome CDP prêt sur 127.0.0.1:9441 pour g4-colors.mjs
+  ok   état initial : dataset = 2 — {"ds":"2","sel":"2","ls":null}
+  ok   état initial : select = 2
+  ok   cartes présentes dans le DOM (4 atouts) — s0..s3 rendues
+  ok   mode 2 : cœur (s1) rouge #b3352c — rgb(179, 53, 44)
+  ok   mode 2 : carreau (s2) rouge #b3352c — rgb(179, 53, 44)
+  ok   mode 2 : pique (s0) noir #1a1f2b — rgb(26, 31, 43)
+  ok   mode 2 : trèfle (s3) noir #1a1f2b — rgb(26, 31, 43)
+  ok   mode 4 : dataset = 4 — {"ds":"4","sel":"4","ls":"4"}
+  ok   mode 4 : persisté en localStorage = 4
+  ok   mode 4 : pique (s0) noir — rgb(26, 31, 43)
+  ok   mode 4 : cœur (s1) rouge — rgb(179, 53, 44)
+  ok   mode 4 : carreau (s2) vert — rgb(31, 157, 85)
+  ok   mode 4 : trèfle (s3) bleu — rgb(36, 86, 201)
+  ok   retour mode 2 : dataset = 2, LS = 2 — {"ds":"2","sel":"2","ls":"2"}
+  ok   persistance : après reload dataset = 4 — {"ds":"4","sel":"4","ls":"4"}
+  ok   persistance : après reload select = 4
+  ok   persistance : après reload LS = 4
+  ok   0 erreur JS console — 0 erreur(s)
+
+[PORTE 4] 18 OK, 0 FAIL
+[PORTE 4] PORTE PASSÉE
+=== RC: 0 (1 s)
+=== EOF PORTE 08/23 g4-colors (RC=0) ===
+===================================================================
+=== PORTE 09/23 g5-rownames
+=== CMD: node test/run-headless.mjs g5-rownames.mjs 9442
+Chrome CDP prêt sur 127.0.0.1:9442 pour g5-rownames.mjs
+  ok   après deal : 6 noms = 6 mains évaluées — OK
+  ok   24 vérifications en jeu : 100 % des noms = main évaluée — 0 écart sur 24 itérations
+  ok   état final : 6 noms = 6 mains évaluées — OK
+  ok   0 erreur JS console — 0 erreur(s)
+
+[PORTE 5] 4 OK, 0 FAIL
+[PORTE 5] PORTE PASSÉE
+=== RC: 0 (20 s)
+=== EOF PORTE 09/23 g5-rownames (RC=0) ===
+===================================================================
+=== PORTE 10/23 g5-ui
+=== CMD: node test/run-headless.mjs g5-ui.mjs 9443
+Chrome CDP prêt sur 127.0.0.1:9443 pour g5-ui.mjs
+  ok   page chargée, G v2 (snapshots UI) présent
+  ok   partie facile : drag & drop a modifié le plateau (31 drops)
+  ok   partie facile : écran final affiché
+  ok   partie facile : 3 lignes décomposées par joueur — humain 3, IA 3
+  ok   partie facile : timer à 0.0 s au final — 0.0 s
+  ok   partie facile : scores affichés = scores calculés — affichés 22/95, calculés 22/95
+    partie facile : humain 22 pts, IA 95 pts, vainqueur ai — Done — 29 human swap(s), 9 AI swap(s).
+  ok   partie normal : drag & drop a modifié le plateau (31 drops)
+  ok   partie normal : écran final affiché
+  ok   partie normal : 3 lignes décomposées par joueur — humain 3, IA 3
+  ok   partie normal : timer à 0.0 s au final — 0.0 s
+  ok   partie normal : scores affichés = scores calculés — affichés 14/75, calculés 14/75
+    partie normal : humain 14 pts, IA 75 pts, vainqueur ai — Done — 29 human swap(s), 19 AI swap(s).
+  ok   partie difficile : drag & drop a modifié le plateau (31 drops)
+  ok   partie difficile : écran final affiché
+  ok   partie difficile : 3 lignes décomposées par joueur — humain 3, IA 3
+  ok   partie difficile : timer à 0.0 s au final — 0.0 s
+  ok   partie difficile : scores affichés = scores calculés — affichés 6/300, calculés 6/300
+    partie difficile : humain 6 pts, IA 300 pts, vainqueur ai — Done — 29 human swap(s), 39 AI swap(s).
+  ok   dépôt hors plateau → message d’annulation — "Dropped off the board: cancelled."
+  ok   dépôt sur le plateau IA → refus (lecture seule) — "Refused: the AI board is read-only."
+  ok   partie de refus : final atteint
+  ok   0 erreur JS console (3 parties + refus) — 0 erreur(s)
+
+[PORTE 5] 20 OK, 0 FAIL
+[PORTE 5] PORTE PASSÉE
+=== RC: 0 (73 s)
+=== EOF PORTE 10/23 g5-ui (RC=0) ===
+===================================================================
+=== PORTE 11/23 g6-audio
+=== CMD: node test/run-headless.mjs g6-audio.mjs 9444
+Chrome CDP prêt sur 127.0.0.1:9444 pour g6-audio.mjs
+  ok   G.AUDIO défini
+  ok   init headless OK (ensure() sans exception)
+  ok   AudioContext créé headless — {"ready":true,"ctx":true}
+  ok   musique OFF par défaut (chargement frais : musicOn === false, aucune entrée LS) — {"m":false,"s":true,"lm":null,"pressed":"false","cls":"audio-btn"}
+  ok   toggle musique reflète OFF au chargement (aria-pressed=false, pas de classe .on) — {"m":false,"s":true,"lm":null,"pressed":"false","cls":"audio-btn"}
+  ok   SFX ON par défaut
+  ok   musique 1er clic : armement ON (v2.1) : état + LS + aria-pressed — {"m":true,"lm":"1","pressed":"true"}
+  ok   musique 2e clic : OFF
+  ok   musique 3e clic : ON (retour)
+  ok   SFX 1er clic : armement ON (v2.1) : état + LS — {"s":true,"ls":"1"}
+  ok   SFX 2e clic : OFF
+  ok   slider volume musique = 0.33 — 0.33
+  ok   sliders séparés (musique 0.33 / SFX 0.5) — {"m":0.33,"s":0.5}
+  ok   9 SFX invocables sans exception — OK
+  ok   partie complète avec audio : final atteint
+  ok   0 erreur JS console (audio headless) — 0 erreur(s)
+
+[PORTE 6] 16 OK, 0 FAIL
+[PORTE 6] PORTE PASSÉE
+=== RC: 0 (11 s)
+=== EOF PORTE 11/23 g6-audio (RC=0) ===
+===================================================================
+=== PORTE 12/23 g7-fx
+=== CMD: node test/run-headless.mjs g7-fx.mjs 9445
+Chrome CDP prêt sur 127.0.0.1:9445 pour g7-fx.mjs
+  ok   G.FX défini (canvas présent)
+  ok   canvas plein écran (largeur/hauteur > 0) — {"w":758,"h":482,"dpr":1,"clamp":true}
+  ok   devicePixelRatio borné ≤ 2 — dpr=1
+  ok   particules actives après le deal — actives=52
+  ok   bursts ajoutent des particules — avant=52 après=108
+  ok   60 fps ciblés (mesure headless ≥ 45 fps) — fps mesuré = 60
+  ok   secousse d’écran déclenchée au final
+  ok   0 erreur JS avec FX activés — 0 erreur(s)
+
+[PORTE 7] 8 OK, 0 FAIL
+[PORTE 7] PORTE PASSÉE
+=== RC: 0 (11 s)
+=== EOF PORTE 12/23 g7-fx (RC=0) ===
+===================================================================
+=== PORTE 13/23 g9-boards
+=== CMD: node test/run-headless.mjs g9-boards.mjs 9446
+Chrome CDP prêt sur 127.0.0.1:9446 pour g9-boards.mjs
+== G9 — 30 seeds × 2 plateaux, barème interne cohérent (v2) ==
+[ OK ] D1 : bord droit de la grille de cartes (.rows + cellules) du plateau joueur à <= 8 px du bord droit intérieur du cadre (1920x1080) — grille droit=936 px, .rows droit=936 px, cadre droit int.=936 px (d=0 px)
+[ OK ] D2 : bord droit de la ligne de score (.total) à <= 8 px du bord droit intérieur du cadre — total droit=936 px
+[ OK ] D3 : bord droit du titre (h2) à <= 8 px du bord droit intérieur du cadre — h2 droit=936 px
+[ OK ] D4 : bouton GO à droite de la ligne de score, dans le cadre — go=[854.125..936], pts.droit=847.484375, cadre droit int.=936
+[ OK ] D5 : plateau joueur immédiatement à gauche du plateau IA (écart = gap grid 18 px) — human.droit=951, ai.gauche=969, gap=18
+[ OK ] D6 : plateau IA non modifié (ligne .row à <= 8 px du bord gauche intérieur du cadre, grille de cartes à 134 px de celle-ci : colonnes de nom + gap) — rowA.gauche=984 px, cadre gauche int.=984 px, grille cartes gauche=1118 px, track0=128 px
+[ OK ] D7 : mobile <900 px — 1 colonne (layout restant utilisable) — grid-template-columns=749px
+[ OK ] D8 : mobile — plateau IA sous le plateau joueur — aTop=604, hBottom=586
+file: C:\Users\Mikerhinos\.openmausbot\workspaces\8b7108b4-e038-49f5-90ef-53f03bd46b30\poker-chrono\index.html
+seed 1000: h=14 ia=14 OK
+seed 1001: h=6 ia=6 OK
+seed 1002: h=22 ia=22 OK
+seed 1003: h=52 ia=52 OK
+seed 1004: h=44 ia=44 OK
+seed 1005: h=14 ia=14 OK
+seed 1006: h=37 ia=37 OK
+seed 1007: h=14 ia=14 OK
+seed 1008: h=37 ia=37 OK
+seed 1009: h=6 ia=6 OK
+seed 1010: h=6 ia=6 OK
+seed 1011: h=6 ia=6 OK
+seed 1012: h=14 ia=14 OK
+seed 1013: h=22 ia=22 OK
+seed 1014: h=52 ia=52 OK
+seed 1015: h=22 ia=22 OK
+seed 1016: h=60 ia=60 OK
+seed 1017: h=6 ia=6 OK
+seed 1018: h=6 ia=6 OK
+seed 1019: h=22 ia=22 OK
+seed 1020: h=22 ia=22 OK
+seed 1021: h=37 ia=37 OK
+seed 1022: h=22 ia=22 OK
+seed 1023: h=30 ia=30 OK
+seed 1024: h=22 ia=22 OK
+seed 1025: h=14 ia=14 OK
+seed 1026: h=6 ia=6 OK
+seed 1027: h=14 ia=14 OK
+seed 1028: h=37 ia=37 OK
+seed 1029: h=14 ia=14 OK
+[ OK ] 60 plateaux : somme des lignes = boardScore = barème
+FAILURES: 0
+RESULT: OK
+=== RC: 0 (1 s)
+=== EOF PORTE 13/23 g9-boards (RC=0) ===
+===================================================================
+=== PORTE 14/23 g11-noscore
+=== CMD: node test/run-headless.mjs g11-noscore.mjs 9447
+Chrome CDP prêt sur 127.0.0.1:9447 pour g11-noscore.mjs
+[ OK ] G.state absent du namespace public — {"hasState":false,"hasLastSeed":false}
+[ OK ] G.lastSeed absent du namespace public
+[ OK ] muter le snapshot ne modifie pas le plateau vivant
+[ OK ] tick(dt négatif) ignoré, timeLeft inchangé — {"ended":false,"aiMoved":false}
+[ OK ] tick(dt NaN) ignoré, timeLeft inchangé
+[ OK ] tick(dt positif) fonctionne après refus (consistance) — afterPositive=19900
+[ OK ] simulateGame : 0 erreur, partie terminée — []
+[ OK ] score humain final = barème du plateau final — human=29 ref=29
+[ OK ] score IA final = barème du plateau final — ai=185 ref=185
+FAILURES: 0
+RESULT: OK
+=== RC: 0 (1 s)
+=== EOF PORTE 14/23 g11-noscore (RC=0) ===
+===================================================================
+=== PORTE 15/23 g12-seed
+=== CMD: node test/run-headless.mjs g12-seed.mjs 9448
+Chrome CDP prêt sur 127.0.0.1:9448 pour g12-seed.mjs
+[ OK ] deals de 52 cartes (15+15+37)
+[ OK ] miroir réel : main joueur == main IA
+[ OK ] 2 parties réelles → deals différents (128 bits)
+[ OK ] même seed override → mêmes 15 cartes (joueur)
+[ OK ] même seed override → main IA identique (miroir)
+[ OK ] override : miroir human == ai
+[ OK ] deux seeds 128 bits différents → deals différents
+[ OK ] seed négatif → chemin réel (≠ deal override)
+[ OK ] seed non entier → chemin réel (≠ deal override)
+[ OK ] seeds invalides : miroir conservé
+FAILURES: 0
+RESULT: OK
+=== RC: 0 (1 s)
+=== EOF PORTE 15/23 g12-seed (RC=0) ===
+===================================================================
+=== PORTE 16/23 g13-best
+=== CMD: node test/run-headless.mjs g13-best.mjs 9449
+Chrome CDP prêt sur 127.0.0.1:9449 pour g13-best.mjs
+[ OK ] partie 1 : final atteint, score humain défini — {"best":"New best score: 22 pts","stored":"22","human":22}
+[ OK ] best « abc » ne bloque pas : record écrit — stored=22 human=22
+[ OK ] affichage « Nouveau meilleur score » — New best score: 22 pts
+[ OK ] best « 999999 » conservé (pas de faux record) — stored=999999 human=22
+[ OK ] affichage du meilleur existant (pas « nouveau ») — Best score: 999999 pts
+[ OK ] best « -5 » → 0 : record écrit — stored=22 human=22
+FAILURES: 0
+RESULT: OK
+=== RC: 0 (32 s)
+=== EOF PORTE 16/23 g13-best (RC=0) ===
+===================================================================
+=== PORTE 17/23 g15-i18n
+=== CMD: node test/run-headless.mjs g15-i18n.mjs 9450
+Chrome CDP prêt sur 127.0.0.1:9450 pour g15-i18n.mjs
+  ok  langue par défaut = en (getLang)
+  ok  <html lang="en" par défaut
+  ok  titre EN appliqué
+  ok  meta description EN appliquée
+  ok  5 langues (en, fr, es, it, de)
+  ok  5 dictionnaires : même jeu de clés
+  ok  0 clé vide sur les 5 dictionnaires
+  ok  nombre de clés rapporté
+  ok  noms de mains traduits (9 mains + Incomplet, 5 langues)
+  ok  aucun caractère FR accentué sur la page EN (hors menu langue)
+  ok  menu langue : aucun select#lang (popup native remplacée)
+  ok  menu langue : bouton + liste présents, liste fermée au départ
+  ok  menu langue : 5 options data-lang (en,fr,es,it,de)
+  ok  menu langue : étiquette bouton = langue courante (EN)
+  ok  menu langue : clic bouton → ouverte (aria-expanded="true", hidden retiré)
+  ok  menu langue : clic option ES → getLang() = es
+  ok  menu langue : clic option ES → <html lang="es"> + localStorage es
+  ok  menu langue : clic option ES → étiquette bouton « Español »
+  ok  menu langue : clic option ES → liste fermée (hidden + aria-expanded="false")
+  ok  menu langue : retour EN avant la suite du test
+  ok  FR : <html lang="fr">
+  ok  FR : titre traduit
+  ok  FR : localStorage persisté
+  ok  FR : difficultés Facile/Normal/Difficile
+  ok  FR : statut idle traduit
+  ok  DE : <html lang="de">
+  ok  DE : localStorage
+  ok  EN restauré : <html lang="en">
+  ok  EN restauré : localStorage
+  ok  persistance au rechargement (it)
+g15-i18n : 30 ok, 0 fail
+=== RC: 0 (1 s)
+=== EOF PORTE 17/23 g15-i18n (RC=0) ===
+===================================================================
+=== PORTE 18/23 go-ui
+=== CMD: node test/run-headless.mjs go-ui.mjs 9451
+Chrome CDP prêt sur 127.0.0.1:9451 pour go-ui.mjs
+  ok  partie lancée (90 s)
+  ok  GO désactivé à t<5 s
+  ok  GO activé à t≈5 s (5000–5500 ms)
+  ok  clic GO effectué
+  ok  fin affichée après GO (plateaux décomposés)
+  ok  bonus = 16 pts (cap v2.1)
+  ok  total = plateau + 16
+  ok  détail en fin : bonus affiché avec les plateaux
+  ok  titre de fin non vide (W3C)
+  ok  double-clic : 1 seul bonus (idempotent)
+  ok  fin normale : bonus 0
+go-ui : 11 ok, 0 fail
+=== RC: 0 (16 s)
+=== EOF PORTE 18/23 go-ui (RC=0) ===
+===================================================================
+=== PORTE 19/23 go-ui-85
+=== CMD: node test/run-headless.mjs go-ui-85.mjs 9452
+Chrome CDP prêt sur 127.0.0.1:9452 pour go-ui-85.mjs
+  ok  partie lancée (90 s)
+  ok  GO toujours actif a t=85 s (jusqua la fin)
+  ok  clic GO effectué (t≈85 s)
+  ok  GO à t=85 s : bonus = 5 pts
+  ok  total = plateau + 5
+  ok  détail en fin : 5 pts de bonus affichés
+go-ui-85 : 6 ok, 0 fail
+=== RC: 0 (86 s)
+=== EOF PORTE 19/23 go-ui-85 (RC=0) ===
+===================================================================
+=== PORTE 20/23 g5-run
+=== CMD: node test/g5-run.mjs
+Chrome CDP prêt sur 127.0.0.1:9347
+  ok   page chargée, G v2 (snapshots UI) présent
+  ok   partie facile : drag & drop a modifié le plateau (31 drops)
+  ok   partie facile : écran final affiché
+  ok   partie facile : 3 lignes décomposées par joueur — humain 3, IA 3
+  ok   partie facile : timer à 0.0 s au final — 0.0 s
+  ok   partie facile : scores affichés = scores calculés — affichés 14/95, calculés 14/95
+    partie facile : humain 14 pts, IA 95 pts, vainqueur ai — Done — 29 human swap(s), 9 AI swap(s).
+  ok   partie normal : drag & drop a modifié le plateau (31 drops)
+  ok   partie normal : écran final affiché
+  ok   partie normal : 3 lignes décomposées par joueur — humain 3, IA 3
+  ok   partie normal : timer à 0.0 s au final — 0.0 s
+  ok   partie normal : scores affichés = scores calculés — affichés 14/162, calculés 14/162
+    partie normal : humain 14 pts, IA 162 pts, vainqueur ai — Done — 29 human swap(s), 19 AI swap(s).
+  ok   partie difficile : drag & drop a modifié le plateau (31 drops)
+  ok   partie difficile : écran final affiché
+  ok   partie difficile : 3 lignes décomposées par joueur — humain 3, IA 3
+  ok   partie difficile : timer à 0.0 s au final — 0.0 s
+  ok   partie difficile : scores affichés = scores calculés — affichés 14/60, calculés 14/60
+    partie difficile : humain 14 pts, IA 60 pts, vainqueur ai — Done — 29 human swap(s), 39 AI swap(s).
+  ok   dépôt hors plateau → message d’annulation — "Dropped off the board: cancelled."
+  ok   dépôt sur le plateau IA → refus (lecture seule) — "Refused: the AI board is read-only."
+  ok   partie de refus : final atteint
+  ok   0 erreur JS console (3 parties + refus) — 0 erreur(s)
+
+[PORTE 5] 20 OK, 0 FAIL
+[PORTE 5] PORTE PASSÉE
+=== RC: 0 (73 s)
+=== EOF PORTE 20/23 g5-run (RC=0) ===
+===================================================================
+=== PORTE 21/23 g16-p2p
+=== CMD: node test/run-headless.mjs g16-p2p.mjs 9347
+Chrome CDP prêt sur 127.0.0.1:9347 pour g16-p2p.mjs
+[ OK ] broker par défaut : cloud 0.peerjs.com:443 (secure)
+[ OK ] deux onglets CDP ouverts (hôte + visiteur), même page
+[ OK ] contrat DOM 2P : 8 ids (#p2p-*) — [true,true,true,true,true,true,true,true]
+[ OK ] panneau 2P masqué au chargement
+[ OK ] bouton repli solo masqué au chargement
+[ OK ] bouton Ready masqué au chargement
+[ OK ] G.version = 2.2.3 — v=2.2.3
+[ OK ] G.UI.start2PGame/applyRemoteMove + G.P2P host/join/genSeed/validateInit/buildInit/validateMove/onLocalHumanMove + hook _test + G.remoteSwap/humanSwap
+[ OK ] buildInit valide (type=init, p=pc2p/v1, v=2, graine 128 bits, d=normal, time=20, hash OK) — {"ok":true,"type":true,"p":true,"v":true,"seedOk":true,"d":true,"t":true,"boards":true,"hashOk":true}
+[ OK ] validateInit rejette : seed absent, seed invalide, protocole invalide, hash invalide, temps invalide — {"r1":false,"r2":false,"r3":false,"r4":false,"r5":false}
+[ OK ] validateMove : 0→4 OK, 0→0 refusé
+[ OK ] G.P2P.genSeed : 4 mots int32 (128 bits) — [1547538569,3829451594,3621089242,2538996050]
+[ OK ] remoteSwap 0→4 : board ai modifié, aiMoves=1
+[ OK ] remoteSwap invalide (from==to) refusé, sans effet
+[ OK ] observateurs statut installés (hôte + visiteur)
+[ OK ] countdown invalide (sans rôle / n non entier) : statut inchangé
+[ OK ] bouton Ready visible côté hôte ET visiteur
+[ OK ] B1 Play + Rejouer inactifs avant 2×Ready (hôte ET visiteur) — [{"s":true,"r":true},{"s":true,"r":true}]
+[ OK ] B1 Play + Rejouer inactifs après 1×Ready seul (hôte) — {"s":true,"r":true}
+[ OK ] clicks Ready effectués des deux côtés
+[ OK ] départ effectif des deux côtés (game running)
+[ OK ] B1 Play + Rejouer inactifs pendant la partie 2P (hôte) — {"s":true,"r":true}
+[ OK ] options hôte propagées (difficulty=normal des deux côtés) — h=normal g=normal
+[ OK ] deal miroir : human == ai (hôte)
+[ OK ] deal miroir : human == ai (visiteur)
+[ OK ] deal identique hôte == visiteur
+[ OK ] hôte : compte à rebours 3-2-1 affiché (ticks >= 2) — seq=["Connecting...","Waiting for \"Ready?\"","Waiting for opponent…","Dealing in 3…","Dealing in 2…","Dealing in 1…","Connected"]
+[ OK ] visiteur : compte à rebours synchronisé reçu (ticks >= 2) — seq=["Connecting...","Waiting for \"Ready?\"","Waiting for opponent…","Dealing in 3…","Dealing in 2…","Dealing in 1…","Connected"]
+[ OK ] visiteur : ticks strictement décroissants 3 -> 1 — [3,2,1]
+[ OK ] visiteur : swap UI réussi (Pointer Events), humanMoves >= 1
+[ OK ] hôte : coup distant reçu et appliqué (aiMoves=1)
+[ OK ] invariant post-move : board ai(hôte) == board humain(visiteur)
+[ OK ] invariant post-move : board humain(hôte) == board ai(visiteur)
+[ OK ] statut final : « Connected » des deux côtés — hôte=Connected visiteur=Connected
+[ OK ] fin de partie 2P (over des 2 côtés, time=20 s)
+[ OK ] B1 fin 2P : écran final affiché, Play inactif, Rejouer ré-armé (hôte) — {"f":true,"s":true,"r":true}
+[ OK ] B2 Rejouer 2P (visiteur) : pas de partie IA — fin maintenue, plateaux gelés, mode 2P conservé — {"e":true,"rn":false,"two":true}
+[ OK ] B2 proposition reçue par le hôte : statut « Rematch? », bouton Ready re-ouvert, pas de re-départ — {"e":true,"rn":false,"st":"Rematch? Your opponent wants to play again.","ready":true}
+[ OK ] B2 le hôte n'auto-accepte pas la proposition (localReady/started/dealing = false) — {"role":"host","localReady":false,"peerReady":true,"started":false,"dealing":false,"seed":null}
+[ OK ] B2 acceptation hôte → nouvelle partie 2P (running des 2 côtés)
+[ OK ] B2 rematch : 30 cartes (15/plateau), miroir hôte == visiteur — cartes=30
+[ OK ] B2 options conservées dans le rematch (difficulty=normal des 2 côtés) — h=normal g=normal
+[ OK ] B3 plateau adverse = « Player 2 » des 2 côtés (EN) — h=Player 2 g=Player 2
+[ OK ] B3 plateau humain inchangé = « Your board » (EN) — h=Your board
+[ OK ] B3 « Player 2 » traduit : FR = « Joueur 2 » après setLang — h=Joueur 2
+FAILURES: 0
+RESULT: OK
+=== RC: 0 (30 s)
+=== EOF PORTE 21/23 g16-p2p (RC=0) ===
+===================================================================
+=== PORTE 22/23 g2g4-bench900
+=== CMD: node test/g2g4-headless.js
+(node:2384) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/Mikerhinos/.openmausbot/workspaces/8b7108b4-e038-49f5-90ef-53f03bd46b30/poker-chrono/test/g2g4-headless.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to \\?\C:\Users\Mikerhinos\.openmausbot\workspaces\8b7108b4-e038-49f5-90ef-53f03bd46b30\poker-chrono\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  facile: score IA moyen 136.09, score humain moyen 27.70, victoires IA 284/300 (94.7%), humain 9, égalité 7, erreurs JS 0, scores humains distincts 21
+  normal: score IA moyen 167.89, score humain moyen 27.70, victoires IA 298/300 (99.3%), humain 1, égalité 1, erreurs JS 0, scores humains distincts 21
+  difficile: score IA moyen 209.57, score humain moyen 27.70, victoires IA 299/300 (99.7%), humain 1, égalité 0, erreurs JS 0, scores humains distincts 21
+
+  total : 900 parties en 107.0 s
+  stats 900 parties (humains) : min=6, P1 (90e pct)=52.00, médiane=22.00, max=215
+  GO anti-abus : min + 85 = 91 vs P1 - 30 = 52.00 → cap recalibré = floor(P1 - min - 30) = 16
+  ok   PORTE 2 : ≥ 900 parties jouées — 900 parties
+  ok   PORTE 2 : 0 erreur JS — 0 erreur(s)
+  ok   PORTE 4 : score IA moyen croissant — 136.09 < 167.89 < 209.57
+  ok   PORTE 4 : taux de victoire IA croissant — 94.7% < 99.3% < 99.7%
+  ok   PORTE 4 : scores non constants (≥ 5 valeurs distinctes par difficulté) — 21 / 21 / 21 valeurs distinctes
+  ok   PORTE 4 : pas d’égalités systématiques (≤ 50% égalités par difficulté) — égalités : 7, 1, 0 / 300
+
+[PORTE 2/4] 6 OK, 0 FAIL
+[PORTE 2/4] PORTE PASSÉE
+{
+  "total": 900,
+  "totalErrors": 0,
+  "wall": "107.0",
+  "stats": {
+    "n": 900,
+    "min": 6,
+    "p1": 52,
+    "median": 22,
+    "max": 215
+  },
+  "results": {
+    "facile": {
+      "n": 300,
+      "errors": 0,
+      "avgHuman": 27.7,
+      "avgAI": 136.08666666666667,
+      "winAI": 0.9466666666666667,
+      "wins": {
+        "human": 9,
+        "ai": 284,
+        "draw": 7
+      },
+      "distinctHuman": 21,
+      "minHuman": 6,
+      "maxHuman": 215
+    },
+    "normal": {
+      "n": 300,
+      "errors": 0,
+      "avgHuman": 27.7,
+      "avgAI": 167.89333333333335,
+      "winAI": 0.9933333333333333,
+      "wins": {
+        "human": 1,
+        "ai": 298,
+        "draw": 1
+      },
+      "distinctHuman": 21,
+      "minHuman": 6,
+      "maxHuman": 215
+    },
+    "difficile": {
+      "n": 300,
+      "errors": 0,
+      "avgHuman": 27.7,
+      "avgAI": 209.57,
+      "winAI": 0.9966666666666667,
+      "wins": {
+        "human": 1,
+        "ai": 299,
+        "draw": 0
+      },
+      "distinctHuman": 21,
+      "minHuman": 6,
+      "maxHuman": 215
+    }
+  }
+}
+=== RC: 0 (107 s)
+=== EOF PORTE 22/23 g2g4-bench900 (RC=0) ===
+===================================================================
+=== PORTE 23/23 eslint-p23
+=== CMD: node node_modules/eslint/bin/eslint.js --no-config-lookup --config test/results/v2.2-a/eslint.concat.config.mjs all.js
+
+=== RC: 0 (1 s)
+=== EOF PORTE 23/23 eslint-p23 (RC=0) ===

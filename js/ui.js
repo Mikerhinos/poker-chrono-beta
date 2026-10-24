@@ -53,6 +53,7 @@
 
   let state = null;
   let twoPlayer = false; // v2.2 P2P : mode 2 joueurs actif
+  let p2pSession = false; // v2.2.3 B1 : session 2P active (host/join en cours)
 
   let uiTimer = null;
 
@@ -134,6 +135,7 @@
     /* v2.1.2 : la pulsation du bouton de départ est ré-armée — une nouvelle
      * partie est à nouveau possible depuis le bouton #start. */
     $('#start').classList.add('pulse-glow');
+    updateStartButtons(); // v2.2.3 B1 : « Rejouer » (2P) ré-armé à la fin
   }
 
   function flashAiMove() {
@@ -299,6 +301,57 @@
     return G.I18N.handName(G.isFull(row) ? G.evaluate5(row).label : 'Incomplet');
   }
 
+  /* v2.2.3 B1 : garde des boutons #start (Play) et #replay (Rejouer).
+   * En session 2P (twoPlayer ou p2pSession), ils sont inactifs : le
+   * démarrage d'une partie 2P ne passe que par le handshake Ready et le
+   * « Rejouer » est une proposition, jamais un départ solo (voir net.js).
+   * En solo, le comportement est inchangé (Play / Rejouer = nouvelle
+   * partie IA). */
+  function updateStartButtons() {
+    const running = state ? state.running : false;
+    const ended = state ? state.result !== null : false;
+    const blocked = twoPlayer || p2pSession;
+    const startEl = $('#start');
+    const replayEl = $('#replay');
+    if (startEl) startEl.disabled = blocked || running;
+    if (replayEl) replayEl.disabled = blocked && !ended;
+  }
+
+  /* v2.2.3 B1 : entrée/sortie d'une session 2P (appelée par net.js —
+   * host/join au canal ouvert, disconnect, et le hook de test _test) →
+   * ré-évalue la garde Play/Rejouer. */
+  function setP2PActive(on) {
+    p2pSession = !!on;
+    updateStartButtons();
+  }
+
+  /* v2.2.3 B3 : libellés des plateaux. En 2P, le plateau adverse s'affiche
+   * « Player 2 » (5 langues, clé p2p_player2) ; en solo, les libellés
+   * existants (ai_board / human_board). Re-appliqué après chaque
+   * changement de langue (i18n.apply) et à chaque démarrage de partie. */
+  function updateBoardTitles() {
+    const aiKey = twoPlayer ? 'p2p_player2' : 'ai_board';
+    const set = (sel, key) => {
+      const el = $(sel);
+      if (el) el.textContent = G.I18N.t(key);
+    };
+    set('#board-ai h2', aiKey);
+    set('#board-human h2', 'human_board');
+    set('#bd-ai h3', aiKey);
+    set('#bd-human h3', 'human_board');
+  }
+
+  /* v2.2.3 B2 : « Rejouer » — en 2P, envoie une proposition de rematch à
+   * l'adversaire (jamais de partie solo/IA depuis l'écran de fin 2P) ;
+   * en solo, redémarre contre l'IA (comportement historique). */
+  function onReplayClick() {
+    if (twoPlayer && G.P2P && typeof G.P2P.proposeRematch === 'function') {
+      G.P2P.proposeRematch();
+      return;
+    }
+    startGame();
+  }
+
   /* ---------- cycle de vie ---------- */
   function beginGame(difficulty, time, seed, frozen) {
     const opts = { difficulty, time };
@@ -324,15 +377,22 @@
 
   function startGame() {
     twoPlayer = false;
+    p2pSession = false;
+    G.twoPlayerMode = false;
     beginGame($('#diff').value, parseInt($('#time').value, 10), null, false);
+    updateBoardTitles();
   }
 
   /* v2.2 P2P : demarrage a partir du seed 128 bits partags (4xuint32).
    * L'IA locale est gelée ; les coups du distant arrivent via applyRemoteMove. */
   function start2PGame(seed, difficulty, time) {
     twoPlayer = true;
+    p2pSession = true;
+    G.twoPlayerMode = true;
     beginGame(difficulty || 'normal', time || 30, seed, true);
     status(G.I18N.t('status_connected'));
+    updateBoardTitles();
+    updateStartButtons();
   }
 
   /* v2.2 P2P : un swap du distant s'applique sur NOTRE plateau "ai" (le sien). */
@@ -428,7 +488,7 @@
 
   $('#go').addEventListener('click', onGoClick);
 
-  $('#replay').addEventListener('click', startGame);
+  $('#replay').addEventListener('click', onReplayClick);
 
   /* v2 : toggle de rendu 2 ↔ 4 couleurs (persisté, rendu uniquement). */
   const colorsSel = $('#colors');
@@ -518,6 +578,7 @@
   G.UI = {
     renderBoard, renderAll, updateScores, updateTimer,
     startGame, endGame, rowLabel, start2PGame, applyRemoteMove,
+    setP2PActive, updateBoardTitles,
     colorMode: () => colorMode,
     setColors: (m) => {
       colorMode = m === '4' ? '4' : '2';

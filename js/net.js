@@ -277,6 +277,7 @@
     }
     currentPeer = null;
     role = null;
+    if (G.UI && G.UI.setP2PActive) G.UI.setP2PActive(false); // v2.2.3 B1
   }
 
   // ---- Code de salle : 6 caractères sans 0/O/1/I (ambigus) ----
@@ -327,6 +328,29 @@
     maybeDeal();
   }
 
+  // v2.2.3 B2 : « Rejouer » en 2P = proposition de rematch envoyée à
+  // l'adversaire (type 'rematch'). Le proposeur ré-initialise son
+  // handshake et exprime déjà son acceptation (Ready) ; la nouvelle
+  // partie ne démarre que si l'adversaire répond par son propre
+  // « Ready ? » (traité dans onMessage). Jamais de partie solo/IA
+  // depuis l'écran de fin 2P.
+  function proposeRematch() {
+    if (!role || !currentPeer || !currentPeer.p2p) return false;
+    if (dealing) return false; // countdown en cours
+    // Une proposition n'est valable qu'entre deux parties : si une partie
+    // est encore en cours (result === null), on refuse. « started » n'est
+    // effacé que par resetHandshake, d'où le test d'état de partie ici.
+    const ended = !!(G.UI && G.UI.stateInfo && G.UI.stateInfo().ended);
+    if (started && !ended) return false;
+    resetHandshake();
+    const p = { type: 'rematch' };
+    if (seedRef.d) p.d = seedRef.d;
+    if (seedRef.time) p.time = seedRef.time;
+    currentPeer.p2p.send(p);
+    markReady(); // mon acceptation ; le deal part si l'adversaire est prêt
+    return true;
+  }
+
   function maybeDeal() {
     if (started || dealing) return;
     if (!localReady || !peerReady) return; // handshake incomplet : on attend
@@ -354,6 +378,10 @@
     const v = validateInit(msg);
     if (!v.ok) { setStatus('status_err_seed_mismatch'); return; }
     started = true;
+    // v2.2.3 B2 : le visiteur retient les options de la partie pour les
+    // re-propager dans une proposition « Rejouer » (role guest).
+    seedRef.d = msg.d;
+    seedRef.time = msg.time;
     if (G.UI && G.UI.start2PGame) G.UI.start2PGame(msg.seed, msg.d, msg.time);
     setStatus('status_connected');
   }
@@ -374,6 +402,22 @@
       const v = validateMove(msg);
       if (!v.ok) return; // coup invalide : ignoré, jamais appliqué tel quel
       G.UI.applyRemoteMove(msg.f, msg.to);
+    } else if (msg.type === 'rematch') {
+      // v2.2.3 B2 : proposition « rejouer » de l'adversaire (il a pressé
+      // « Rejouer » depuis l'écran de fin 2P). On lui pose la question :
+      // bouton « Ready ? » re-ouvert, statut demandé ; la nouvelle partie
+      // ne démarre que s'il presse « Ready ? » (markReady → maybeDeal —
+      // mécanique existante, aucun chemin parallèle, jamais de partie solo).
+      if (dealing) return; // countdown en cours : la proposition est stale
+      if (role === 'guest') {
+        // options de la partie (propagées par le proposeur) : le visiteur
+        // les retient pour ses propres propositions ultérieures.
+        if (msg.d && DIFFICULTIES.indexOf(msg.d) >= 0) seedRef.d = msg.d;
+        if (msg.time && TIME_OPTIONS.indexOf(msg.time) >= 0) seedRef.time = msg.time;
+      }
+      resetHandshake();
+      setStatus(G.I18N.t('p2p_rematch_ask'));
+      showReadyButton();
     }
   }
 
@@ -395,6 +439,7 @@
       // puis l'hôte envoie l'init et démarre les deux parties (mêmes 15 cartes).
       showReadyButton();
       setStatus('p2p_wait_ready');
+      if (G.UI && G.UI.setP2PActive) G.UI.setP2PActive(true); // v2.2.3 B1
     });
   }
 
@@ -413,6 +458,7 @@
       // canal ouvert : on attend le Ready de l'adversaire puis son init.
       showReadyButton();
       setStatus('p2p_wait_ready');
+      if (G.UI && G.UI.setP2PActive) G.UI.setP2PActive(true); // v2.2.3 B1
     });
   }
 
@@ -478,6 +524,7 @@
     host,
     join,
     markReady,
+    proposeRematch,
     onLocalHumanMove,
     _brokerCfg: brokerCfg,
     _setStatus: setStatus,
@@ -486,7 +533,7 @@
     // + accès handshake. Aucune surface d'attaque ajoutée ; n'affecte ni le
     // flux réel ni le barème.
     _test: {
-      injectPeer: function (peer, r) { currentPeer = peer; role = r; resetHandshake(); seedRef.d = 'normal'; seedRef.time = 30; },
+      injectPeer: function (peer, r) { currentPeer = peer; role = r; resetHandshake(); seedRef.d = 'normal'; seedRef.time = 30; if (G.UI && G.UI.setP2PActive) G.UI.setP2PActive(true); },
       getReady: markReady,
       onMessage: onMessage,
       state: function () { return { role: role, localReady: localReady, peerReady: peerReady, started: started, dealing: dealing, seed: seedRef.seed }; },

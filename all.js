@@ -484,7 +484,7 @@ function swapCells(board, i, j) {
   }
 
   globalThis.G = {
-    version: '2.2.2',
+    version: '2.2.3',
     // barème verbatim
     RANKS, RANK_LABEL, SUIT_LABEL, SUIT_NAME, HAND_SCORES, HAND_LABEL,
     isValidCard, evaluate5, isFull, rowScore, boardScore, boardBreakdown,
@@ -580,6 +580,8 @@ function swapCells(board, i, j) {
       p2p_wait_ready: 'Warten auf "Sind Sie bereit?"',
       p2p_wait_opp: 'Warten auf den Gegner…',
       p2p_cd: 'Deal in {n}…',
+      p2p_player2: 'Spieler 2',
+      p2p_rematch_ask: 'Rematch? Dein Gegner möchte neu spielen.',
             err_from: 'Ungültiger Zug: Ausgangsfeld außerhalb.',
       err_to: 'Ungültiger Zug: Zielfeld außerhalb.',
       err_bad_card: 'Ungültiger Zug: unbekannte Karte.',
@@ -660,6 +662,8 @@ status_err_seed_mismatch: 'Unstimmiger Anfangszustand (Manipulation?)'},
       p2p_wait_ready: 'Waiting for "Ready?"',
       p2p_wait_opp: 'Waiting for opponent…',
       p2p_cd: 'Dealing in {n}…',
+      p2p_player2: 'Player 2',
+      p2p_rematch_ask: 'Rematch? Your opponent wants to play again.',
             err_from: 'Bad move: origin out of range.',
       err_to: 'Bad move: destination out of range.',
       err_bad_card: 'Bad move: unknown card.',
@@ -740,6 +744,8 @@ status_err_seed_mismatch: 'Initial state mismatch (possible tamper)'},
       p2p_wait_ready: 'Esperando "¿Preparado?"',
       p2p_wait_opp: 'Esperando al oponente…',
       p2p_cd: 'Reparto en {n}…',
+      p2p_player2: 'Jugador 2',
+      p2p_rematch_ask: '¿Volver a jugar? Tu oponente quiere otra partida.',
             err_from: 'Movimiento inválido: origen fuera de límites.',
       err_to: 'Movimiento inválido: destino fuera de límites.',
       err_bad_card: 'Movimiento inválido: carta desconocida.',
@@ -820,6 +826,8 @@ status_err_seed_mismatch: 'Estado inicial no coincide (¿trampa?)'},
       p2p_wait_ready: 'Attente du « Prêt ? »',
       p2p_wait_opp: 'Attente du partenaire…',
       p2p_cd: 'Départ dans {n}…',
+      p2p_player2: 'Joueur 2',
+      p2p_rematch_ask: 'Rejouer ? Ton partenaire veut rejouer.',
             err_from: 'Mauvais déplacement : origine hors limites.',
       err_to: 'Mauvais déplacement : destination hors limites.',
       err_bad_card: 'Mauvais déplacement : carte inconnue.',
@@ -900,6 +908,8 @@ status_err_seed_mismatch: 'État initial incohérent (triche ?)'},
       p2p_wait_ready: 'In attesa del "Pronto?"',
       p2p_wait_opp: 'In attesa del giocatore…',
       p2p_cd: 'Distribuzione in {n}…',
+      p2p_player2: 'Giocatore 2',
+      p2p_rematch_ask: 'Rigiocare? Il tuo avversario vuole ripartire.',
             err_from: 'Scambio non valido: origine fuori limite.',
       err_to: 'Scambio non valido: destinazione fuori limite.',
       err_bad_card: 'Scambio non valido: carta sconosciuta.',
@@ -941,6 +951,9 @@ status_err_seed_mismatch: 'Stato iniziale non corrispondente (trucco?)'}
     for (const el of document.querySelectorAll('[data-i18n-title]')) {
       el.setAttribute('title', t(el.getAttribute('data-i18n-title')));
     }
+    /* v2.2.3 B3 : les libellés de plateau dynamiques (2P « Player 2 ») suivent
+     * la langue active — re-appliqués après chaque apply(). */
+    if (G.UI && typeof G.UI.updateBoardTitles === 'function') G.UI.updateBoardTitles();
   }
 
   function dict() { return DICTS[lang] || DICTS.en; }
@@ -1533,6 +1546,7 @@ status_err_seed_mismatch: 'Stato iniziale non corrispondente (trucco?)'}
 
   let state = null;
   let twoPlayer = false; // v2.2 P2P : mode 2 joueurs actif
+  let p2pSession = false; // v2.2.3 B1 : session 2P active (host/join en cours)
 
   let uiTimer = null;
 
@@ -1614,6 +1628,7 @@ status_err_seed_mismatch: 'Stato iniziale non corrispondente (trucco?)'}
     /* v2.1.2 : la pulsation du bouton de départ est ré-armée — une nouvelle
      * partie est à nouveau possible depuis le bouton #start. */
     $('#start').classList.add('pulse-glow');
+    updateStartButtons(); // v2.2.3 B1 : « Rejouer » (2P) ré-armé à la fin
   }
 
   function flashAiMove() {
@@ -1779,6 +1794,57 @@ status_err_seed_mismatch: 'Stato iniziale non corrispondente (trucco?)'}
     return G.I18N.handName(G.isFull(row) ? G.evaluate5(row).label : 'Incomplet');
   }
 
+  /* v2.2.3 B1 : garde des boutons #start (Play) et #replay (Rejouer).
+   * En session 2P (twoPlayer ou p2pSession), ils sont inactifs : le
+   * démarrage d'une partie 2P ne passe que par le handshake Ready et le
+   * « Rejouer » est une proposition, jamais un départ solo (voir net.js).
+   * En solo, le comportement est inchangé (Play / Rejouer = nouvelle
+   * partie IA). */
+  function updateStartButtons() {
+    const running = state ? state.running : false;
+    const ended = state ? state.result !== null : false;
+    const blocked = twoPlayer || p2pSession;
+    const startEl = $('#start');
+    const replayEl = $('#replay');
+    if (startEl) startEl.disabled = blocked || running;
+    if (replayEl) replayEl.disabled = blocked && !ended;
+  }
+
+  /* v2.2.3 B1 : entrée/sortie d'une session 2P (appelée par net.js —
+   * host/join au canal ouvert, disconnect, et le hook de test _test) →
+   * ré-évalue la garde Play/Rejouer. */
+  function setP2PActive(on) {
+    p2pSession = !!on;
+    updateStartButtons();
+  }
+
+  /* v2.2.3 B3 : libellés des plateaux. En 2P, le plateau adverse s'affiche
+   * « Player 2 » (5 langues, clé p2p_player2) ; en solo, les libellés
+   * existants (ai_board / human_board). Re-appliqué après chaque
+   * changement de langue (i18n.apply) et à chaque démarrage de partie. */
+  function updateBoardTitles() {
+    const aiKey = twoPlayer ? 'p2p_player2' : 'ai_board';
+    const set = (sel, key) => {
+      const el = $(sel);
+      if (el) el.textContent = G.I18N.t(key);
+    };
+    set('#board-ai h2', aiKey);
+    set('#board-human h2', 'human_board');
+    set('#bd-ai h3', aiKey);
+    set('#bd-human h3', 'human_board');
+  }
+
+  /* v2.2.3 B2 : « Rejouer » — en 2P, envoie une proposition de rematch à
+   * l'adversaire (jamais de partie solo/IA depuis l'écran de fin 2P) ;
+   * en solo, redémarre contre l'IA (comportement historique). */
+  function onReplayClick() {
+    if (twoPlayer && G.P2P && typeof G.P2P.proposeRematch === 'function') {
+      G.P2P.proposeRematch();
+      return;
+    }
+    startGame();
+  }
+
   /* ---------- cycle de vie ---------- */
   function beginGame(difficulty, time, seed, frozen) {
     const opts = { difficulty, time };
@@ -1804,15 +1870,22 @@ status_err_seed_mismatch: 'Stato iniziale non corrispondente (trucco?)'}
 
   function startGame() {
     twoPlayer = false;
+    p2pSession = false;
+    G.twoPlayerMode = false;
     beginGame($('#diff').value, parseInt($('#time').value, 10), null, false);
+    updateBoardTitles();
   }
 
   /* v2.2 P2P : demarrage a partir du seed 128 bits partags (4xuint32).
    * L'IA locale est gelée ; les coups du distant arrivent via applyRemoteMove. */
   function start2PGame(seed, difficulty, time) {
     twoPlayer = true;
+    p2pSession = true;
+    G.twoPlayerMode = true;
     beginGame(difficulty || 'normal', time || 30, seed, true);
     status(G.I18N.t('status_connected'));
+    updateBoardTitles();
+    updateStartButtons();
   }
 
   /* v2.2 P2P : un swap du distant s'applique sur NOTRE plateau "ai" (le sien). */
@@ -1908,7 +1981,7 @@ status_err_seed_mismatch: 'Stato iniziale non corrispondente (trucco?)'}
 
   $('#go').addEventListener('click', onGoClick);
 
-  $('#replay').addEventListener('click', startGame);
+  $('#replay').addEventListener('click', onReplayClick);
 
   /* v2 : toggle de rendu 2 ↔ 4 couleurs (persisté, rendu uniquement). */
   const colorsSel = $('#colors');
@@ -1998,6 +2071,7 @@ status_err_seed_mismatch: 'Stato iniziale non corrispondente (trucco?)'}
   G.UI = {
     renderBoard, renderAll, updateScores, updateTimer,
     startGame, endGame, rowLabel, start2PGame, applyRemoteMove,
+    setP2PActive, updateBoardTitles,
     colorMode: () => colorMode,
     setColors: (m) => {
       colorMode = m === '4' ? '4' : '2';
@@ -2319,6 +2393,7 @@ status_err_seed_mismatch: 'Stato iniziale non corrispondente (trucco?)'}
     }
     currentPeer = null;
     role = null;
+    if (G.UI && G.UI.setP2PActive) G.UI.setP2PActive(false); // v2.2.3 B1
   }
 
   // ---- Code de salle : 6 caractères sans 0/O/1/I (ambigus) ----
@@ -2369,6 +2444,29 @@ status_err_seed_mismatch: 'Stato iniziale non corrispondente (trucco?)'}
     maybeDeal();
   }
 
+  // v2.2.3 B2 : « Rejouer » en 2P = proposition de rematch envoyée à
+  // l'adversaire (type 'rematch'). Le proposeur ré-initialise son
+  // handshake et exprime déjà son acceptation (Ready) ; la nouvelle
+  // partie ne démarre que si l'adversaire répond par son propre
+  // « Ready ? » (traité dans onMessage). Jamais de partie solo/IA
+  // depuis l'écran de fin 2P.
+  function proposeRematch() {
+    if (!role || !currentPeer || !currentPeer.p2p) return false;
+    if (dealing) return false; // countdown en cours
+    // Une proposition n'est valable qu'entre deux parties : si une partie
+    // est encore en cours (result === null), on refuse. « started » n'est
+    // effacé que par resetHandshake, d'où le test d'état de partie ici.
+    const ended = !!(G.UI && G.UI.stateInfo && G.UI.stateInfo().ended);
+    if (started && !ended) return false;
+    resetHandshake();
+    const p = { type: 'rematch' };
+    if (seedRef.d) p.d = seedRef.d;
+    if (seedRef.time) p.time = seedRef.time;
+    currentPeer.p2p.send(p);
+    markReady(); // mon acceptation ; le deal part si l'adversaire est prêt
+    return true;
+  }
+
   function maybeDeal() {
     if (started || dealing) return;
     if (!localReady || !peerReady) return; // handshake incomplet : on attend
@@ -2396,6 +2494,10 @@ status_err_seed_mismatch: 'Stato iniziale non corrispondente (trucco?)'}
     const v = validateInit(msg);
     if (!v.ok) { setStatus('status_err_seed_mismatch'); return; }
     started = true;
+    // v2.2.3 B2 : le visiteur retient les options de la partie pour les
+    // re-propager dans une proposition « Rejouer » (role guest).
+    seedRef.d = msg.d;
+    seedRef.time = msg.time;
     if (G.UI && G.UI.start2PGame) G.UI.start2PGame(msg.seed, msg.d, msg.time);
     setStatus('status_connected');
   }
@@ -2416,6 +2518,22 @@ status_err_seed_mismatch: 'Stato iniziale non corrispondente (trucco?)'}
       const v = validateMove(msg);
       if (!v.ok) return; // coup invalide : ignoré, jamais appliqué tel quel
       G.UI.applyRemoteMove(msg.f, msg.to);
+    } else if (msg.type === 'rematch') {
+      // v2.2.3 B2 : proposition « rejouer » de l'adversaire (il a pressé
+      // « Rejouer » depuis l'écran de fin 2P). On lui pose la question :
+      // bouton « Ready ? » re-ouvert, statut demandé ; la nouvelle partie
+      // ne démarre que s'il presse « Ready ? » (markReady → maybeDeal —
+      // mécanique existante, aucun chemin parallèle, jamais de partie solo).
+      if (dealing) return; // countdown en cours : la proposition est stale
+      if (role === 'guest') {
+        // options de la partie (propagées par le proposeur) : le visiteur
+        // les retient pour ses propres propositions ultérieures.
+        if (msg.d && DIFFICULTIES.indexOf(msg.d) >= 0) seedRef.d = msg.d;
+        if (msg.time && TIME_OPTIONS.indexOf(msg.time) >= 0) seedRef.time = msg.time;
+      }
+      resetHandshake();
+      setStatus(G.I18N.t('p2p_rematch_ask'));
+      showReadyButton();
     }
   }
 
@@ -2437,6 +2555,7 @@ status_err_seed_mismatch: 'Stato iniziale non corrispondente (trucco?)'}
       // puis l'hôte envoie l'init et démarre les deux parties (mêmes 15 cartes).
       showReadyButton();
       setStatus('p2p_wait_ready');
+      if (G.UI && G.UI.setP2PActive) G.UI.setP2PActive(true); // v2.2.3 B1
     });
   }
 
@@ -2455,6 +2574,7 @@ status_err_seed_mismatch: 'Stato iniziale non corrispondente (trucco?)'}
       // canal ouvert : on attend le Ready de l'adversaire puis son init.
       showReadyButton();
       setStatus('p2p_wait_ready');
+      if (G.UI && G.UI.setP2PActive) G.UI.setP2PActive(true); // v2.2.3 B1
     });
   }
 
@@ -2520,6 +2640,7 @@ status_err_seed_mismatch: 'Stato iniziale non corrispondente (trucco?)'}
     host,
     join,
     markReady,
+    proposeRematch,
     onLocalHumanMove,
     _brokerCfg: brokerCfg,
     _setStatus: setStatus,
@@ -2528,7 +2649,7 @@ status_err_seed_mismatch: 'Stato iniziale non corrispondente (trucco?)'}
     // + accès handshake. Aucune surface d'attaque ajoutée ; n'affecte ni le
     // flux réel ni le barème.
     _test: {
-      injectPeer: function (peer, r) { currentPeer = peer; role = r; resetHandshake(); seedRef.d = 'normal'; seedRef.time = 30; },
+      injectPeer: function (peer, r) { currentPeer = peer; role = r; resetHandshake(); seedRef.d = 'normal'; seedRef.time = 30; if (G.UI && G.UI.setP2PActive) G.UI.setP2PActive(true); },
       getReady: markReady,
       onMessage: onMessage,
       state: function () { return { role: role, localReady: localReady, peerReady: peerReady, started: started, dealing: dealing, seed: seedRef.seed }; },

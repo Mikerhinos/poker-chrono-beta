@@ -1,0 +1,12 @@
+# Normalisation bench 900 — v2.2.3 (2026-10-24)
+# Entrée : g2g4-bench900.log (stdout+stderr du bench, test/results/v2.2.3/)
+# Rejoint \n + \n final, SHA-256 UTF-8.
+#
+# Retrait de la ligne « total : 900 parties en X s » et des 4 lignes de warning Node
+# MODULE_TYPELESS_PACKAGE_JSON (ligne (node:…)[MODULE_TYPELESS_PACKAGE_JSON],
+# « Reparsing as ES module… », « To eliminate this warning… », « (Use node
+# --trace-warnings … ) ») ; JSON field "wall" → "111.5" (valeur de référence v2.1.2).
+#
+312841cd81911460d998d4b4d6a026cfab11b4c7efca4559a8443bc828bc357a
+# Identique à la référence v2.1.2 / v2.2 / v2.2.1 / v2.2.2 : la logique du jeu est inchangée.
+# Re-vérifié 2× (déterministe) le 2026-10-24 (K0D3R, TASK-V223-BUGS-2P-20261024-01).

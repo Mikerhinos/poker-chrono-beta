@@ -83,6 +83,8 @@
       p2p_wait_ready: 'Warten auf "Sind Sie bereit?"',
       p2p_wait_opp: 'Warten auf den Gegner…',
       p2p_cd: 'Deal in {n}…',
+      p2p_player2: 'Spieler 2',
+      p2p_rematch_ask: 'Rematch? Dein Gegner möchte neu spielen.',
             err_from: 'Ungültiger Zug: Ausgangsfeld außerhalb.',
       err_to: 'Ungültiger Zug: Zielfeld außerhalb.',
       err_bad_card: 'Ungültiger Zug: unbekannte Karte.',
@@ -163,6 +165,8 @@ status_err_seed_mismatch: 'Unstimmiger Anfangszustand (Manipulation?)'},
       p2p_wait_ready: 'Waiting for "Ready?"',
       p2p_wait_opp: 'Waiting for opponent…',
       p2p_cd: 'Dealing in {n}…',
+      p2p_player2: 'Player 2',
+      p2p_rematch_ask: 'Rematch? Your opponent wants to play again.',
             err_from: 'Bad move: origin out of range.',
       err_to: 'Bad move: destination out of range.',
       err_bad_card: 'Bad move: unknown card.',
@@ -243,6 +247,8 @@ status_err_seed_mismatch: 'Initial state mismatch (possible tamper)'},
       p2p_wait_ready: 'Esperando "¿Preparado?"',
       p2p_wait_opp: 'Esperando al oponente…',
       p2p_cd: 'Reparto en {n}…',
+      p2p_player2: 'Jugador 2',
+      p2p_rematch_ask: '¿Volver a jugar? Tu oponente quiere otra partida.',
             err_from: 'Movimiento inválido: origen fuera de límites.',
       err_to: 'Movimiento inválido: destino fuera de límites.',
       err_bad_card: 'Movimiento inválido: carta desconocida.',
@@ -323,6 +329,8 @@ status_err_seed_mismatch: 'Estado inicial no coincide (¿trampa?)'},
       p2p_wait_ready: 'Attente du « Prêt ? »',
       p2p_wait_opp: 'Attente du partenaire…',
       p2p_cd: 'Départ dans {n}…',
+      p2p_player2: 'Joueur 2',
+      p2p_rematch_ask: 'Rejouer ? Ton partenaire veut rejouer.',
             err_from: 'Mauvais déplacement : origine hors limites.',
       err_to: 'Mauvais déplacement : destination hors limites.',
       err_bad_card: 'Mauvais déplacement : carte inconnue.',
@@ -403,6 +411,8 @@ status_err_seed_mismatch: 'État initial incohérent (triche ?)'},
       p2p_wait_ready: 'In attesa del "Pronto?"',
       p2p_wait_opp: 'In attesa del giocatore…',
       p2p_cd: 'Distribuzione in {n}…',
+      p2p_player2: 'Giocatore 2',
+      p2p_rematch_ask: 'Rigiocare? Il tuo avversario vuole ripartire.',
             err_from: 'Scambio non valido: origine fuori limite.',
       err_to: 'Scambio non valido: destinazione fuori limite.',
       err_bad_card: 'Scambio non valido: carta sconosciuta.',
@@ -444,6 +454,9 @@ status_err_seed_mismatch: 'Stato iniziale non corrispondente (trucco?)'}
     for (const el of document.querySelectorAll('[data-i18n-title]')) {
       el.setAttribute('title', t(el.getAttribute('data-i18n-title')));
     }
+    /* v2.2.3 B3 : les libellés de plateau dynamiques (2P « Player 2 ») suivent
+     * la langue active — re-appliqués après chaque apply(). */
+    if (G.UI && typeof G.UI.updateBoardTitles === 'function') G.UI.updateBoardTitles();
   }
 
   function dict() { return DICTS[lang] || DICTS.en; }

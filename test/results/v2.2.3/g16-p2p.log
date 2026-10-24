@@ -1,0 +1,48 @@
+Chrome CDP prêt sur 127.0.0.1:9347 pour g16-p2p.mjs
+[ OK ] broker par défaut : cloud 0.peerjs.com:443 (secure)
+[ OK ] deux onglets CDP ouverts (hôte + visiteur), même page
+[ OK ] contrat DOM 2P : 8 ids (#p2p-*) — [true,true,true,true,true,true,true,true]
+[ OK ] panneau 2P masqué au chargement
+[ OK ] bouton repli solo masqué au chargement
+[ OK ] bouton Ready masqué au chargement
+[ OK ] G.version = 2.2.3 — v=2.2.3
+[ OK ] G.UI.start2PGame/applyRemoteMove + G.P2P host/join/genSeed/validateInit/buildInit/validateMove/onLocalHumanMove + hook _test + G.remoteSwap/humanSwap
+[ OK ] buildInit valide (type=init, p=pc2p/v1, v=2, graine 128 bits, d=normal, time=20, hash OK) — {"ok":true,"type":true,"p":true,"v":true,"seedOk":true,"d":true,"t":true,"boards":true,"hashOk":true}
+[ OK ] validateInit rejette : seed absent, seed invalide, protocole invalide, hash invalide, temps invalide — {"r1":false,"r2":false,"r3":false,"r4":false,"r5":false}
+[ OK ] validateMove : 0→4 OK, 0→0 refusé
+[ OK ] G.P2P.genSeed : 4 mots int32 (128 bits) — [1547538569,3829451594,3621089242,2538996050]
+[ OK ] remoteSwap 0→4 : board ai modifié, aiMoves=1
+[ OK ] remoteSwap invalide (from==to) refusé, sans effet
+[ OK ] observateurs statut installés (hôte + visiteur)
+[ OK ] countdown invalide (sans rôle / n non entier) : statut inchangé
+[ OK ] bouton Ready visible côté hôte ET visiteur
+[ OK ] B1 Play + Rejouer inactifs avant 2×Ready (hôte ET visiteur) — [{"s":true,"r":true},{"s":true,"r":true}]
+[ OK ] B1 Play + Rejouer inactifs après 1×Ready seul (hôte) — {"s":true,"r":true}
+[ OK ] clicks Ready effectués des deux côtés
+[ OK ] départ effectif des deux côtés (game running)
+[ OK ] B1 Play + Rejouer inactifs pendant la partie 2P (hôte) — {"s":true,"r":true}
+[ OK ] options hôte propagées (difficulty=normal des deux côtés) — h=normal g=normal
+[ OK ] deal miroir : human == ai (hôte)
+[ OK ] deal miroir : human == ai (visiteur)
+[ OK ] deal identique hôte == visiteur
+[ OK ] hôte : compte à rebours 3-2-1 affiché (ticks >= 2) — seq=["Connecting...","Waiting for \"Ready?\"","Waiting for opponent…","Dealing in 3…","Dealing in 2…","Dealing in 1…","Connected"]
+[ OK ] visiteur : compte à rebours synchronisé reçu (ticks >= 2) — seq=["Connecting...","Waiting for \"Ready?\"","Waiting for opponent…","Dealing in 3…","Dealing in 2…","Dealing in 1…","Connected"]
+[ OK ] visiteur : ticks strictement décroissants 3 -> 1 — [3,2,1]
+[ OK ] visiteur : swap UI réussi (Pointer Events), humanMoves >= 1
+[ OK ] hôte : coup distant reçu et appliqué (aiMoves=1)
+[ OK ] invariant post-move : board ai(hôte) == board humain(visiteur)
+[ OK ] invariant post-move : board humain(hôte) == board ai(visiteur)
+[ OK ] statut final : « Connected » des deux côtés — hôte=Connected visiteur=Connected
+[ OK ] fin de partie 2P (over des 2 côtés, time=20 s)
+[ OK ] B1 fin 2P : écran final affiché, Play inactif, Rejouer ré-armé (hôte) — {"f":true,"s":true,"r":true}
+[ OK ] B2 Rejouer 2P (visiteur) : pas de partie IA — fin maintenue, plateaux gelés, mode 2P conservé — {"e":true,"rn":false,"two":true}
+[ OK ] B2 proposition reçue par le hôte : statut « Rematch? », bouton Ready re-ouvert, pas de re-départ — {"e":true,"rn":false,"st":"Rematch? Your opponent wants to play again.","ready":true}
+[ OK ] B2 le hôte n'auto-accepte pas la proposition (localReady/started/dealing = false) — {"role":"host","localReady":false,"peerReady":true,"started":false,"dealing":false,"seed":null}
+[ OK ] B2 acceptation hôte → nouvelle partie 2P (running des 2 côtés)
+[ OK ] B2 rematch : 30 cartes (15/plateau), miroir hôte == visiteur — cartes=30
+[ OK ] B2 options conservées dans le rematch (difficulty=normal des 2 côtés) — h=normal g=normal
+[ OK ] B3 plateau adverse = « Player 2 » des 2 côtés (EN) — h=Player 2 g=Player 2
+[ OK ] B3 plateau humain inchangé = « Your board » (EN) — h=Your board
+[ OK ] B3 « Player 2 » traduit : FR = « Joueur 2 » après setLang — h=Joueur 2
+FAILURES: 0
+RESULT: OK
